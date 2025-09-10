@@ -1,0 +1,89 @@
+// components/workout/WorkoutOptions.tsx
+import { useState } from "react";
+import {
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
+
+    type Props = {
+        onDeleteWorkout: () => void;
+    };
+
+const WorkoutOptions = ({ onDeleteWorkout }: Props) => {
+  const [open, setOpen] = useState(false);
+
+  const toggleOptions = () => setOpen(!open);
+
+  return (
+    <View style={styles.container}>
+      {/* 🔹 Przycisk */}
+      <TouchableOpacity style={styles.button} onPress={toggleOptions}>
+        <Text style={styles.buttonText}>⚙️</Text>
+      </TouchableOpacity>
+
+      {/* 🔹 Dymek z opcjami */}
+      {open && (
+        <View style={styles.dropdown}>
+          <TouchableOpacity style={styles.optionButton}>
+            <Text style={styles.optionText}>✏️ Zmień tytuł</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.optionButton}>
+            <Text style={styles.optionText}>🏋️‍♂️ Ustaw typ treningu</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.optionButton} onPress={onDeleteWorkout}>
+            <Text style={[styles.optionText, { color: "red" }]}>🗑️ Usuń trening</Text>
+          </TouchableOpacity>
+
+        </View>
+      )}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    position: "relative",
+    alignItems: "center",
+    backgroundColor:"#ad3b3bff",
+  },
+  button: {
+    backgroundColor: "#ff8c00",
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  dropdown: {
+    position: "absolute",
+    top: 50, // 🔹 odstęp od przycisku
+    right: 0,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5, // cień na Androidzie
+    zIndex: 100,
+    minWidth: 180,
+  },
+  optionButton: {
+    paddingVertical: 10,
+  },
+  optionText: {
+    fontSize: 16,
+    textAlign: "left",
+  },
+});
+
+export default WorkoutOptions;

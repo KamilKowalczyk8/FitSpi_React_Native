@@ -4,16 +4,23 @@ import { createContext, ReactNode, useState } from 'react';
 type User = {
   id: string;
   email: string;
-  // miejsce na kolejne pola
+
 };
 
 type AuthContextType = {
   user: User | null;
   setUser: (user: User | null) => void;
   isLoading: boolean;
-  register: (email: string, password: string) => Promise<boolean>;
+  register: (userData: {
+    first_name: string;
+    last_name: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+  }) => Promise<boolean>;
   login: (email: string, password: string, rememberMe: boolean) => Promise<boolean>;
 };
+
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -31,15 +38,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   });
 
-  const register = async (email: string, password: string): Promise<boolean> => {
+  const register = async (userData: {
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}): Promise<boolean> => {
   try {
-    const response = await fetch('https://your-api.com/register', {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify(userData),
     });
 
-    if (!response.ok) return false;
+    //if (!response.ok) return false;
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Register failed:', errorText);
+      return false;
+    }
 
     const data = await response.json();
     setUser(data.user);
@@ -52,22 +70,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 const login = async (email: string, password: string, rememberMe: boolean): Promise<boolean> => {
   try {
-    const response = await fetch('https://your-api.com/login', {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, rememberMe }),
+      credentials: 'include', 
     });
 
-    if (!response.ok) return false;
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Login failed:', errorText);
+      return false;
+    }
 
     const data = await response.json();
-    setUser(data.user);
-    return true;
+    if (data.user) {
+      setUser(data.user); 
+      return true;
+    } else {
+      return false;
+    }
   } catch (err) {
     console.error(err);
     return false;
   }
 };
+
 
   return (
     <AuthContext.Provider value={{ user, setUser, isLoading, register, login}}>

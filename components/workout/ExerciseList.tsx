@@ -5,7 +5,7 @@ interface Exercise {
   name: string;
   sets: number;
   reps: number;
-  weight?: number; // opcjonalne
+  weight?: number; 
 }
 
 interface ExerciseListProps {

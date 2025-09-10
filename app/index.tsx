@@ -27,7 +27,7 @@ export default function SplashScreen() {
     );
   }
 
-  return <Redirect href={user ? '/(tabs)/workout' : '/(auth)/login'} />;
+  return <Redirect href="/(auth)/login/login" />;
 }
 
 const styles = StyleSheet.create({
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logo: {
-    width: 200,
-    height: 200,
+    width: 300,
+    height: 300,
   },
 });

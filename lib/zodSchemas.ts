@@ -12,10 +12,18 @@ export const loginSchema = z.object({
 });
 
 export const registerSchema = z.object({
-  email: z.string().email('Nieprawidłowy email'),
-  password: z.string().min(6, 'Hasło musi mieć co najmniej 6 znaków'),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Hasła muszą być identyczne',
-  path: ['confirmPassword'],
-});
+    firstName: z.string().min(2, 'Imię musi mieć co najmniej 2 znaki'),
+    lastName: z.string().min(2, 'Nazwisko musi mieć co najmniej 2 znaki'),
+    email: z.string().email('Nieprawidłowy email'),
+    password: z
+      .string()
+      .min(6, 'Hasło musi mieć co najmniej 6 znaków')
+      .regex(/[A-Z]/, 'Hasło musi zawierać jedną dużą literę')
+      .regex(/[0-9]/, 'Hasło musi zawierać cyfrę')
+      .regex(/[^A-Za-z0-9]/, 'Hasło musi zawierać znak specjalny'),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Hasła muszą być identyczne',
+    path: ['confirmPassword'],
+  });

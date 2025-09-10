@@ -18,7 +18,8 @@ export function useLoginController() {
 
       const success = await login(email, password, rememberMe);
       if (success) {
-        router.replace('/(tabs)/workout');
+       router.replace('/(tabs)/workout');
+
       } else {
         alert('Błędny email lub hasło');
       }

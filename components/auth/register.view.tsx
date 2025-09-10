@@ -2,6 +2,10 @@ import { router } from 'expo-router';
 import { Button, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export function RegisterView({
+  firstName,
+  setFirstName,
+  lastName,
+  setLastName,
   email,
   setEmail,
   password,
@@ -14,6 +18,22 @@ export function RegisterView({
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Rejestracja</Text>
+
+      <TextInput
+        style={styles.input}
+        placeholder="Imię"
+        value={firstName}
+        onChangeText={setFirstName}
+      />
+      {errors.first_name && <Text style={styles.error}>{errors.first_name}</Text>}
+
+      <TextInput
+        style={styles.input}
+        placeholder="Nazwisko"
+        value={lastName}
+        onChangeText={setLastName}
+      />
+      {errors.last_name && <Text style={styles.error}>{errors.last_name}</Text>}
 
       <TextInput
         style={styles.input}
@@ -44,7 +64,7 @@ export function RegisterView({
 
       <Button title="Zarejestruj się" onPress={handleRegister} />
 
-      <TouchableOpacity onPress={() => {router.replace('/auth/login'); }}>
+      <TouchableOpacity onPress={() => router.replace('/(auth)/login/login')}>
         <Text style={styles.loginText}>Masz już konto? Zaloguj się</Text>
       </TouchableOpacity>
     </View>

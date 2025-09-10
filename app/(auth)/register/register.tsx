@@ -1,5 +1,6 @@
-import { RegisterView } from '@/components/auth/register.view';
-import { useRegisterController } from './register.controller';
+import { RegisterView } from '../../../components/auth/register.view';
+import { useRegisterController } from '../../../controllers/auth/register.controller';
+
 
 export default function RegisterScreen() {
   const controller = useRegisterController();

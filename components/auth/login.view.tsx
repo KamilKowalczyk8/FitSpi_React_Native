@@ -1,4 +1,5 @@
 import CheckBox from 'expo-checkbox';
+import { router } from 'expo-router';
 import { Button, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export function LoginView({
@@ -32,7 +33,8 @@ export function LoginView({
         <Text style={styles.label}>Zapamiętaj mnie</Text>
       </View>
       <Button title="Zaloguj się" onPress={handleLogin} />
-      <TouchableOpacity onPress={() => {/* tutaj nawigacja do rejestracji */}}>
+      <TouchableOpacity onPress={() => { router.replace('/(auth)/register/register')
+ }}>
         <Text style={styles.registerText}>Nie masz konta? Zarejestruj się</Text>
       </TouchableOpacity>
     </View>
