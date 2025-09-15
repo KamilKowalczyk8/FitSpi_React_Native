@@ -6,14 +6,14 @@ import { z } from 'zod';
 
 export function useRegisterController() {
   const { register } = useAuth();
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [first_name, setFirstName] = useState('');
+  const [last_name, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState<{
-    firstName?: string;
-    lastName?: string;
+    first_name?: string;
+    last_name?: string;
     email?: string;
     password?: string;
     confirmPassword?: string;
@@ -22,21 +22,20 @@ export function useRegisterController() {
   const handleRegister = async () => {
     try {
       registerSchema.parse({
-        firstName,
-        lastName,
+        first_name,
+        last_name,
         email,
         password,
         confirmPassword,
       });
 
       const success = await register({
-        first_name: firstName,
-        last_name: lastName,
+        first_name,
+        last_name,
         email,
         password,
         confirmPassword,
       });
-
 
       if (success) {
         router.replace('/(tabs)/workout');
@@ -47,11 +46,15 @@ export function useRegisterController() {
       if (error instanceof z.ZodError) {
         const newErrors: typeof errors = {};
         for (const issue of error.issues) {
-          if (issue.path.includes('firstName')) newErrors.firstName = issue.message;
-          if (issue.path.includes('lastName')) newErrors.lastName = issue.message;
+          if (issue.path.includes('first_name'))
+            newErrors.first_name = issue.message;
+          if (issue.path.includes('last_name'))
+            newErrors.last_name = issue.message;
           if (issue.path.includes('email')) newErrors.email = issue.message;
-          if (issue.path.includes('password')) newErrors.password = issue.message;
-          if (issue.path.includes('confirmPassword')) newErrors.confirmPassword = issue.message;
+          if (issue.path.includes('password'))
+            newErrors.password = issue.message;
+          if (issue.path.includes('confirmPassword'))
+            newErrors.confirmPassword = issue.message;
         }
         setErrors(newErrors);
       } else {
@@ -61,9 +64,9 @@ export function useRegisterController() {
   };
 
   return {
-    firstName,
+    first_name,
     setFirstName,
-    lastName,
+    last_name,
     setLastName,
     email,
     setEmail,

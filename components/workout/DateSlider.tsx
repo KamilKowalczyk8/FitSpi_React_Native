@@ -53,7 +53,7 @@ export const DateSlider: React.FC<DateSliderProps> = ({
             style={[
               styles.dayBox,
               isSelected && styles.selectedDayBox,
-              isToday && !isSelected && styles.todayBox,
+              isToday && !isSelected && styles.dayBox,
             ]}
           >
             <Text style={[styles.dayNumber, (isSelected || isToday) && styles.selectedText]}>

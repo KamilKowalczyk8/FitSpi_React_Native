@@ -9,17 +9,17 @@ export function useLoginController() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {}
+  );
 
   const handleLogin = async () => {
     try {
-      
       loginSchema.parse({ email, password, rememberMe });
 
       const success = await login(email, password, rememberMe);
       if (success) {
-       router.replace('/(tabs)/workout');
-
+        router.replace('/(tabs)/workout');
       } else {
         alert('Błędny email lub hasło');
       }
@@ -28,7 +28,8 @@ export function useLoginController() {
         const newErrors: { email?: string; password?: string } = {};
         for (const issue of error.issues) {
           if (issue.path.includes('email')) newErrors.email = issue.message;
-          if (issue.path.includes('password')) newErrors.password = issue.message;
+          if (issue.path.includes('password'))
+            newErrors.password = issue.message;
         }
         setErrors(newErrors);
       } else {

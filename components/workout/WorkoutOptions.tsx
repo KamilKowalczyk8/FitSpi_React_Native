@@ -1,10 +1,9 @@
-// components/workout/WorkoutOptions.tsx
 import { useState } from "react";
 import {
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
     type Props = {

@@ -11,9 +11,10 @@ export const loginSchema = z.object({
   rememberMe: z.boolean().optional(),
 });
 
-export const registerSchema = z.object({
-    firstName: z.string().min(2, 'Imię musi mieć co najmniej 2 znaki'),
-    lastName: z.string().min(2, 'Nazwisko musi mieć co najmniej 2 znaki'),
+export const registerSchema = z
+  .object({
+    first_name: z.string().min(2, 'Imię musi mieć co najmniej 2 znaki'),
+    last_name: z.string().min(2, 'Nazwisko musi mieć co najmniej 2 znaki'),
     email: z.string().email('Nieprawidłowy email'),
     password: z
       .string()
