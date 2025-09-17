@@ -26,8 +26,7 @@ const handleWorkoutCreated = async (title: string) => {
   }
 
   try {
-    const newWorkout = await WorkoutController.createWorkout(token, title, 1);
-    setWorkoutTitle(newWorkout.description);
+const newWorkout = await WorkoutController.createWorkout(currentToken, title, 1);    setWorkoutTitle(newWorkout.description);
     console.log("Trening zapisany:", newWorkout);
   } catch (error) {
     console.error(error);

@@ -3,7 +3,7 @@ export const WorkoutController = {
     const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
     console.log("🔑 Token wysyłany do backendu:", token); // sprawdź, czy tu leci cały JWT!
-
+    if (!token) throw new Error("Brak tokena!")
     const response = await fetch(`${API_URL}/workouts`, {
       method: 'POST',
       headers: {
