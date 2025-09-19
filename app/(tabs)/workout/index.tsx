@@ -13,20 +13,24 @@ const WorkoutScreen = () => {
   const { user, token } = useAuth(); 
 
 
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [workoutTitle, setWorkoutTitle] = useState("");
 
 const handleWorkoutCreated = async (title: string) => {
-  const currentToken = token; 
-  console.log("Token przed wysłaniem:", currentToken);
-
+  const currentToken = token;
   if (!currentToken) {
     Alert.alert("Błąd", "Nie jesteś zalogowany");
     return;
   }
 
   try {
-const newWorkout = await WorkoutController.createWorkout(currentToken, title, 1);    setWorkoutTitle(newWorkout.description);
+    const newWorkout = await WorkoutController.createWorkout(
+      currentToken,
+      title,  
+      selectedDate,
+      1,     
+    );
+    setWorkoutTitle(newWorkout.description);
     console.log("Trening zapisany:", newWorkout);
   } catch (error) {
     console.error(error);

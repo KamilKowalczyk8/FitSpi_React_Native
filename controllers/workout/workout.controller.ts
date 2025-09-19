@@ -1,5 +1,9 @@
 export const WorkoutController = {
-  createWorkout: async (token: string, description: string, workout_type = 1) => {
+  createWorkout: async (
+    token: string, 
+    description: string, 
+    date?: Date,
+    workout_type = 1) => {
     const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
     console.log("🔑 Token wysyłany do backendu:", token); // sprawdź, czy tu leci cały JWT!
@@ -13,7 +17,7 @@ export const WorkoutController = {
       body: JSON.stringify({
         description,
         workout_type,
-        date: new Date().toISOString(),
+        date: (date ?? new Date()).toISOString(),
       }),
     });
 

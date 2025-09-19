@@ -1,101 +1,135 @@
-import { format, isSameDay } from 'date-fns';
-import { pl } from 'date-fns/locale';
-import React, { useState } from 'react';
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity
-} from 'react-native';
+import { addDays, format, isSameDay, startOfWeek } from "date-fns";
+import { pl } from "date-fns/locale";
+import React, { useEffect, useRef, useState } from "react";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface DateSliderProps {
   selectedDate: Date;
   onSelectDate: (date: Date) => void;
 }
 
-const generateDateRange = () => {
-  const days = [];
-
-  for (let i = -30; i <= 30; i++) {
-    const date = new Date();
-    date.setDate(date.getDate() + i);
-
-    days.push({
+const generateWeekDays = (baseDate: Date) => {
+  const start = startOfWeek(baseDate, { weekStartsOn: 1 });
+  return Array.from({ length: 7 }, (_, i) => {
+    const date = addDays(start, i);
+    return {
       fullDate: date,
-      dayNumber: format(date, 'dd MMM', { locale: pl }),
-      weekDay: format(date, 'EEE', { locale: pl }),
-    });
-  }
-
-  return days;
+      dayNumber: format(date, "dd MMM", { locale: pl }),
+      weekDay: format(date, "EEE", { locale: pl }),
+    };
+  });
 };
 
-export const DateSlider: React.FC<DateSliderProps> = ({
-  selectedDate,
-  onSelectDate,
-}) => {
-  const [days] = useState(generateDateRange());
+export const DateSlider: React.FC<DateSliderProps> = ({ selectedDate, onSelectDate }) => {
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [days, setDays] = useState(generateWeekDays(new Date()));
+  const scrollRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    const newDays = generateWeekDays(addDays(new Date(), weekOffset * 7));
+    setDays(newDays);
+    scrollRef.current?.scrollTo({ x: 0, animated: false });
+  }, [weekOffset]);
+
+  const goToNextWeek = () => setWeekOffset(weekOffset + 1);
+  const goToPrevWeek = () => setWeekOffset(weekOffset - 1);
 
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.sliderContainer}
-    >
-      {days.map((day, index) => {
-        const isSelected = isSameDay(selectedDate, day.fullDate);
-        const isToday = isSameDay(day.fullDate, new Date());
+    <View style={styles.container}>
+      {/* Strzałka w lewo */}
+      <TouchableOpacity onPress={goToPrevWeek} style={[styles.arrowButton, { left: 0 }]}>
+        <Text style={styles.arrowText}>‹</Text>
+      </TouchableOpacity>
 
-        return (
-          <TouchableOpacity
-            key={index}
-            onPress={() => onSelectDate(day.fullDate)}
-            style={[
-              styles.dayBox,
-              isSelected && styles.selectedDayBox,
-              isToday && !isSelected && styles.dayBox,
-            ]}
-          >
-            <Text style={[styles.dayNumber, (isSelected || isToday) && styles.selectedText]}>
-              {day.dayNumber}
-            </Text>
-            <Text style={[styles.weekDay, (isSelected || isToday) && styles.selectedText]}>
-              {day.weekDay}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-    </ScrollView>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.weekContainer}
+        ref={scrollRef}
+      >
+        {days.map((day, index) => {
+          const isSelected = isSameDay(selectedDate, day.fullDate);
+          const isToday = isSameDay(day.fullDate, new Date());
+          return (
+            <TouchableOpacity
+              key={index}
+              onPress={() => onSelectDate(day.fullDate)}
+              style={[
+                styles.dayBox,
+                isSelected ? styles.selectedDayBox : isToday ? styles.todayDayBox : null,
+              ]}
+            >
+              <Text style={[styles.dayNumber, isSelected ? styles.selectedText : isToday ? styles.todayText : null]}>
+                {day.dayNumber}
+              </Text>
+              <Text style={[styles.weekDay, isSelected ? styles.selectedText : isToday ? styles.todayText : null]}>
+                {day.weekDay}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+
+      {/* Strzałka w prawo */}
+      <TouchableOpacity onPress={goToNextWeek} style={[styles.arrowButton, { right: 0 }]}>
+        <Text style={styles.arrowText}>›</Text>
+      </TouchableOpacity>
+    </View>
   );
 };
+
 const styles = StyleSheet.create({
-  sliderContainer: {
-    paddingHorizontal: 10,
-    paddingTop: 10,
-    paddingBottom: 5,
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+  },
+  weekContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    paddingHorizontal: 30, 
   },
   dayBox: {
     width: 70,
     maxHeight: 70,
-    alignItems: 'center',
+    alignItems: "center",
     marginHorizontal: 5,
     paddingVertical: 10,
     borderRadius: 12,
-    backgroundColor: '#E6F0FA',
+    backgroundColor: "#E6F0FA",
   },
   selectedDayBox: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: "#4CAF50",
+  },
+  todayDayBox: {
+    backgroundColor: "#FFD54F",
   },
   dayNumber: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   weekDay: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
   },
   selectedText: {
-    color: '#fff',
+    color: "#fff",
+  },
+  todayText: {
+    color: "#000",
+    fontWeight: "bold",
+  },
+  arrowButton: {
+    position: "absolute",
+    top: "50%",
+    marginTop: -18,
+    paddingHorizontal: 10,
+    zIndex: 10,
+  },
+  arrowText: {
+    fontSize: 40,
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
