@@ -6,9 +6,9 @@ import {
   View,
 } from "react-native";
 
-    type Props = {
-        onDeleteWorkout: () => void;
-    };
+type Props = {
+  onDeleteWorkout: () => void;
+};
 
 const WorkoutOptions = ({ onDeleteWorkout }: Props) => {
   const [open, setOpen] = useState(false);
@@ -30,13 +30,12 @@ const WorkoutOptions = ({ onDeleteWorkout }: Props) => {
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.optionButton}>
-            <Text style={styles.optionText}>🏋️‍♂️ Ustaw typ treningu</Text>
+            <Text style={styles.optionText}>🏋️‍♂️ Kopiuj trening</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.optionButton} onPress={onDeleteWorkout}>
             <Text style={[styles.optionText, { color: "red" }]}>🗑️ Usuń trening</Text>
           </TouchableOpacity>
-
         </View>
       )}
     </View>
@@ -47,7 +46,6 @@ const styles = StyleSheet.create({
   container: {
     position: "relative",
     alignItems: "center",
-    backgroundColor:"#ad3b3bff",
   },
   button: {
     backgroundColor: "#ff8c00",
@@ -72,7 +70,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
     shadowRadius: 5,
-    elevation: 5, // cień na Androidzie
+    elevation: 5,
     zIndex: 100,
     minWidth: 180,
   },
