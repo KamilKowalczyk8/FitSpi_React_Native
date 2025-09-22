@@ -17,7 +17,7 @@ export const WorkoutController = {
       body: JSON.stringify({
         description,
         workout_type,
-        date: (date ?? new Date()).toISOString(),
+        date: (date ?? new Date()).toLocaleDateString("sv-SE"),
       }),
     });
 
@@ -69,5 +69,23 @@ deleteWorkout: async (token: string, workoutId: number) => {
     return true;
 },
 
+    updateWorkoutDescription: async (token: string, workoutId: number, newDescription: string) => {
+        const API_URL = process.env.EXPO_PUBLIC_API_URL;
+        const response = await fetch(`${API_URL}/workouts/${workoutId}/description`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body:JSON.stringify({ description: newDescription}),
+        });
+
+        const result = await response.json();
+        if (!response.ok){
+            throw new Error(result.message || 'Nie udało się zmienic tytuł€ treningu');
+        }
+
+        return result;
+    }
   
 };

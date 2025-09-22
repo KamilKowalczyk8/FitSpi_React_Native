@@ -7,16 +7,17 @@ import { WorkoutController } from "@/controllers/workout/workout.controller";
 import { useAuth } from "@/hooks/useAuth";
 import { isSameDay } from "date-fns";
 import { useEffect, useState } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
-
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const WorkoutScreen = () => {
   const { user, token } = useAuth(); 
 
   const [selectedWorkout, setSelectedWorkout] = useState<any | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [workoutTitle, setWorkoutTitle] = useState("");
   const [workouts, setWorkouts] = useState<any[]>([]);
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editingWorkout, setEditingWorkout] = useState<any | null>(null);
 
   useEffect(() => {
     const fetchWorkouts = async () => {
@@ -33,60 +34,34 @@ const WorkoutScreen = () => {
   }, [token]);
 
   useEffect(() => {
-  const workout = workouts.find((w) => isSameDay(new Date(w.date), selectedDate));
-  if (workout) {
-    setSelectedWorkout(workout);
-  } else {
-    setSelectedWorkout(null);
-  }
-}, [selectedDate, workouts]);
+    const workout = workouts.find(w => isSameDay(new Date(w.date), new Date(selectedDate)));
+    setSelectedWorkout(workout || null);
+  }, [selectedDate, workouts]);
 
+  const handleDeleteWorkout = async () => {
+    if (!token || !selectedWorkout) return;
 
-const handleWorkoutCreated = async (title: string) => {
-  if (!token) {
-    Alert.alert("Błąd", "Nie jesteś zalogowany");
-    return;
-  }
+    try {
+      await WorkoutController.deleteWorkout(token, selectedWorkout.id);
+      setWorkouts(prev => prev.filter(w => w.id !== selectedWorkout.id));
+      setSelectedWorkout(null);
+      Alert.alert("Sukces", "Trening został usunięty");
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Błąd", "Nie udało się usunąć treningu");
+    }
+  };
 
-  try {
-    const newWorkout = await WorkoutController.createWorkout(
-      token,
-      title,
-      selectedDate,
-      1
-    );
+  const openCreateModal = () => {
+    setEditingWorkout(null);
+    setModalVisible(true);
+  };
 
-    setWorkouts((prev) => [...prev, newWorkout]);
-    setSelectedWorkout(newWorkout); 
-
-    console.log("Trening zapisany:", newWorkout);
-  } catch (error) {
-    console.error(error);
-    Alert.alert("Błąd", "Nie udało się utworzyć treningu");
-  }
-};
-
-
-
-const handleDeleteWorkout = async () => {
-  if (!token || !selectedWorkout) return;
-
-  try {
-    await WorkoutController.deleteWorkout(token, selectedWorkout.id);
-
-    // usuń z lokalnego stanu
-    setWorkouts((prev) => prev.filter((w) => w.id !== selectedWorkout.id));
-    setSelectedWorkout(null);
-
-    Alert.alert("Sukces", "Trening został usunięty");
-  } catch (error) {
-    console.error(error);
-    Alert.alert("Błąd", "Nie udało się usunąć treningu");
-  }
-};
-
-
-
+  const openEditModal = () => {
+    if (!selectedWorkout) return;
+    setEditingWorkout(selectedWorkout);
+    setModalVisible(true);
+  };
 
   return (
     <View style={styles.container}>
@@ -99,19 +74,47 @@ const handleDeleteWorkout = async () => {
       </View>
 
       {selectedWorkout ? (
-  <View style={styles.titleSection}>
-    <View style={styles.titleAbsolute}>
-      <WorkoutTitle title={selectedWorkout.description} />
-    </View>
-    <WorkoutOptions onDeleteWorkout={handleDeleteWorkout} />
-  </View>
-) : (
-  // pusty kontener zamiast przycisku dodawania
-  <View style={styles.addSection}>
-    <WorkoutAdd onWorkoutCreated={handleWorkoutCreated} />
-  </View>
-)}
+        <View style={styles.titleSection}>
+          <View style={styles.titleAbsolute}>
+            <WorkoutTitle title={selectedWorkout.description} />
+          </View>
+          <WorkoutOptions
+            onDeleteWorkout={handleDeleteWorkout}
+            handleEditTitle={openEditModal}
+          />
+        </View>
+      ) : (
+        <View style={styles.addSection}>
+          <TouchableOpacity onPress={openCreateModal} style={styles.createButton}>
+            <Text style={{ color: "#fff", fontSize: 18 }}>➕ Stwórz trening</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
+      <WorkoutAdd
+        modalVisible={modalVisible}
+        initialTitle={editingWorkout?.description || ""}
+        onClose={() => setModalVisible(false)}
+        onWorkoutCreated={async (title) => {
+          if (!token) return;
+
+          if (editingWorkout) {
+            const updatedWorkout = await WorkoutController.updateWorkoutDescription(
+              token,
+              editingWorkout.id,
+              title
+            );
+            setWorkouts(prev => prev.map(w => w.id === updatedWorkout.id ? updatedWorkout : w));
+            setSelectedWorkout(updatedWorkout);
+          } else {
+            const newWorkout = await WorkoutController.createWorkout(token, title, selectedDate, 1);
+            setWorkouts(prev => [...prev, newWorkout]);
+            setSelectedWorkout(newWorkout);
+          }
+
+          setModalVisible(false);
+        }}
+      />
     </View>
   );
 };
@@ -137,22 +140,28 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-end",
     paddingHorizontal: 15,
-    paddingVertical: 4,
+    paddingVertical: 10,
     backgroundColor: "#f0f0f0",
     position: "relative",
-  },
-  addSection: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#2d1e83ff",
-    width: "100%",
   },
   titleAbsolute: {
     position: "absolute",
     left: 0,
     right: 0,
     alignItems: "center",
+  },
+  addSection: {
+    flex: 1, // teraz przycisk jest w środku sekcji
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#2d1e83ff",
+    width: "100%",
+  },
+  createButton: {
+    backgroundColor: "#1e90ff",
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 12,
   },
 });
 

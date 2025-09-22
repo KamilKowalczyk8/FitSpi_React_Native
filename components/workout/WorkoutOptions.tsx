@@ -1,19 +1,25 @@
 import { useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type Props = {
   onDeleteWorkout: () => void;
+  handleEditTitle: () => void;
 };
 
-const WorkoutOptions = ({ onDeleteWorkout }: Props) => {
+const WorkoutOptions = ({ onDeleteWorkout, handleEditTitle }: Props) => {
   const [open, setOpen] = useState(false);
 
   const toggleOptions = () => setOpen(!open);
+
+  const handleEditAndClose = () => {
+    handleEditTitle();
+    setOpen(false); // zamykamy po kliknięciu
+  };
+
+  const handleDeleteAndClose = () => {
+    onDeleteWorkout();
+    setOpen(false); // zamykamy po kliknięciu
+  };
 
   return (
     <View style={styles.container}>
@@ -25,7 +31,7 @@ const WorkoutOptions = ({ onDeleteWorkout }: Props) => {
       {/* 🔹 Dymek z opcjami */}
       {open && (
         <View style={styles.dropdown}>
-          <TouchableOpacity style={styles.optionButton}>
+          <TouchableOpacity style={styles.optionButton} onPress={handleEditAndClose}>
             <Text style={styles.optionText}>✏️ Zmień tytuł</Text>
           </TouchableOpacity>
 
@@ -33,7 +39,7 @@ const WorkoutOptions = ({ onDeleteWorkout }: Props) => {
             <Text style={styles.optionText}>🏋️‍♂️ Kopiuj trening</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.optionButton} onPress={onDeleteWorkout}>
+          <TouchableOpacity style={styles.optionButton} onPress={handleDeleteAndClose}>
             <Text style={[styles.optionText, { color: "red" }]}>🗑️ Usuń trening</Text>
           </TouchableOpacity>
         </View>
@@ -60,7 +66,7 @@ const styles = StyleSheet.create({
   },
   dropdown: {
     position: "absolute",
-    top: 50, // 🔹 odstęp od przycisku
+    top: 50,
     right: 0,
     backgroundColor: "#fff",
     borderRadius: 8,
