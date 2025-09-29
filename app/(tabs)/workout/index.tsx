@@ -1,8 +1,11 @@
 import { SettingsDrawer } from "@/components/SettingsDrawer";
 import { DateSlider } from "@/components/workout/DateSlider";
+import ExerciseList from "@/components/workout/ExerciseList";
+import ExerciseAdd from "@/components/workout/view/ExcerciseAdd.view";
 import WorkoutAdd from "@/components/workout/view/WorkoutAdd.view";
 import WorkoutOptions from "@/components/workout/WorkoutOptions";
 import WorkoutTitle from "@/components/workout/WorkoutTitle";
+import { ExerciseController } from "@/controllers/workout/exercise.controller";
 import { WorkoutController } from "@/controllers/workout/workout.controller";
 import { useAuth } from "@/hooks/useAuth";
 import { isSameDay } from "date-fns";
@@ -19,6 +22,9 @@ const WorkoutScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [editingWorkout, setEditingWorkout] = useState<any | null>(null);
 
+  const [exerciseModalVisible, setExerciseModalVisible] = useState(false);
+  const [exercises, setExercises] = useState<any[]>([]); 
+
   useEffect(() => {
     const fetchWorkouts = async () => {
       if (!token) return;
@@ -33,10 +39,30 @@ const WorkoutScreen = () => {
     fetchWorkouts();
   }, [token]);
 
+useEffect(() => {
+  const fetchExercises = async () => {
+    if (!token || !selectedWorkout) return;
+    try {
+      const allExercises = await ExerciseController.getExercises(token);
+      const workoutExercises = allExercises.filter(
+        ex => ex.workoutId === selectedWorkout.id
+      );
+      setExercises(workoutExercises);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  fetchExercises();
+}, [token, selectedWorkout]);
+
   useEffect(() => {
     const workout = workouts.find(w => isSameDay(new Date(w.date), new Date(selectedDate)));
     setSelectedWorkout(workout || null);
   }, [selectedDate, workouts]);
+
+  const handleAddExercise = (exercise: any) => {
+  setExercises((prev) => [...prev, exercise]);
+  };
 
   const handleDeleteWorkout = async () => {
     if (!token || !selectedWorkout) return;
@@ -74,22 +100,48 @@ const WorkoutScreen = () => {
       </View>
 
       {selectedWorkout ? (
-        <View style={styles.titleSection}>
-          <View style={styles.titleAbsolute}>
-            <WorkoutTitle title={selectedWorkout.description} />
-          </View>
-          <WorkoutOptions
-            onDeleteWorkout={handleDeleteWorkout}
-            handleEditTitle={openEditModal}
-          />
-        </View>
-      ) : (
-        <View style={styles.addSection}>
-          <TouchableOpacity onPress={openCreateModal} style={styles.createButton}>
-            <Text style={{ color: "#fff", fontSize: 18 }}>➕ Stwórz trening</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+  <>
+    <View style={styles.titleSection}>
+      <View style={styles.titleAbsolute}>
+        <WorkoutTitle title={selectedWorkout.description} />
+      </View>
+      <WorkoutOptions
+        onDeleteWorkout={handleDeleteWorkout}
+        handleEditTitle={openEditModal}
+      />
+    </View>
+     <View style={{ flex: 1, marginTop: 10 }}>
+    <ExerciseList exercises={exercises.map(ex => ({
+      name: ex.template.name,
+      sets: ex.sets,
+      reps: ex.reps,
+      weight: ex.weight,
+    }))} />
+  </View>
+
+    {/* Sekcja z przyciskiem do dodawania ćwiczeń */}
+    <View style={styles.exerciseAddSection}>
+      <TouchableOpacity
+        onPress={() => setExerciseModalVisible(true)}
+        style={styles.addExerciseButton}
+        >
+        <Text style={styles.addExerciseText}>➕ Dodaj ćwiczenie</Text>
+      </TouchableOpacity>
+
+      <ExerciseAdd
+        modalVisible={exerciseModalVisible}
+        onClose={() => setExerciseModalVisible(false)}
+        onExerciseAdded={handleAddExercise}
+      />
+    </View>
+  </>
+) : (
+  <View style={styles.addSection}>
+    <TouchableOpacity onPress={openCreateModal} style={styles.createButton}>
+      <Text style={{ color: "#fff", fontSize: 18 }}>➕ Stwórz trening</Text>
+    </TouchableOpacity>
+  </View>
+)}
 
       <WorkoutAdd
         modalVisible={modalVisible}
@@ -151,7 +203,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   addSection: {
-    flex: 1, // teraz przycisk jest w środku sekcji
+    flex: 1, 
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#2d1e83ff",
@@ -163,6 +215,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     borderRadius: 12,
   },
+  exerciseAddSection: {
+  paddingHorizontal: 16,
+  marginTop: 20,
+},
+
+addExerciseButton: {
+  backgroundColor: "#32CD32",
+  paddingVertical: 16,
+  borderRadius: 12,
+  alignItems: "center",
+  justifyContent: "center",
+  width: "97%", 
+},
+
+addExerciseText: {
+  color: "#fff",
+  fontSize: 18,
+  fontWeight: "bold",
+},
+
 });
 
 export default WorkoutScreen;

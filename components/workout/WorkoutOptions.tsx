@@ -13,12 +13,12 @@ const WorkoutOptions = ({ onDeleteWorkout, handleEditTitle }: Props) => {
 
   const handleEditAndClose = () => {
     handleEditTitle();
-    setOpen(false); // zamykamy po kliknięciu
+    setOpen(false); 
   };
 
   const handleDeleteAndClose = () => {
     onDeleteWorkout();
-    setOpen(false); // zamykamy po kliknięciu
+    setOpen(false); 
   };
 
   return (
