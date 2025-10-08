@@ -7,6 +7,7 @@ export const ExerciseController = {
       headers: { Authorization: `Bearer ${token}` },
     });
     const result = await response.json();
+    console.log("📥 API /exercise returned:", result);
     if (!response.ok) throw new Error(result.message || "Nie udało się pobrać ćwiczeń");
     return result as ExerciseResponse[];
   },

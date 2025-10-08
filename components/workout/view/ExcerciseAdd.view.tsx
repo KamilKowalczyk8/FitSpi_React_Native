@@ -1,12 +1,14 @@
-import { Picker } from "@react-native-picker/picker";
-import React, { useEffect, useState } from "react";
+import { useExerciseSearch } from '@/hooks/useExerciseSearch';
+import React, { useState } from "react";
 import {
-    Modal,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  FlatList,
+  Modal,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 interface ExerciseTemplate {
@@ -23,82 +25,116 @@ interface ExerciseAddProps {
     sets: number;
     reps: number;
     weight?: number;
+    weightUnits: "kg" | "lbs";
   }) => void;
 }
 
-const ExerciseAdd: React.FC<ExerciseAddProps> = ({
+export const ExerciseAdd: React.FC<ExerciseAddProps> = ({
   modalVisible,
   onClose,
   onExerciseAdded,
 }) => {
-  const [templates, setTemplates] = useState<ExerciseTemplate[]>([]);
-  const [selectedTemplate, setSelectedTemplate] = useState<number | undefined>(undefined);
+  const {
+    filtered,
+    search,
+    selectedTemplate,
+    isListVisible,
+    handleSearch,
+    handleTemplateSelect,
+    handleInputFocus,
+    handleInputBlur,
+    handleClear, 
+    setSelectedTemplate, 
+    setSearch,
+  } = useExerciseSearch();
+  
   const [sets, setSets] = useState("");
   const [reps, setReps] = useState("");
   const [weight, setWeight] = useState("");
-
- useEffect(() => {
-  const fetchTemplates = async () => {
-    try {
-      const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/exercise-templates`);
-      const data = await res.json();
-
-      if (Array.isArray(data)) {
-        setTemplates(data);
-        if (data.length > 0) setSelectedTemplate(data[0].id);
-      } else {
-        console.warn("Oczekiwana tablica templatek, otrzymano:", data);
-        setTemplates([]);
-      }
-    } catch (err) {
-      console.error("Błąd przy pobieraniu ćwiczeń:", err);
-    }
-  };
-  fetchTemplates();
-}, []);
-
+  const [unit, setUnit] = useState<"kg" | "lbs">("kg");
 
   const handleSave = () => {
     if (!selectedTemplate || !sets || !reps) return;
 
-    const template = templates.find(t => t.id === selectedTemplate);
-    if (!template) return;
-
     onExerciseAdded({
-      templateId: selectedTemplate,
-      name: template.name,
+      templateId: selectedTemplate.id,
+      name: selectedTemplate.name,
       sets: Number(sets),
       reps: Number(reps),
       weight: weight ? Number(weight) : undefined,
+      weightUnits: unit,
     });
 
+    handleClear(); 
     setSets("");
     setReps("");
     setWeight("");
     onClose();
   };
 
+  const handleCloseModal = () => {
+    handleClear();
+    setSets("");
+    setReps("");
+    setWeight("");
+    onClose();
+  };
+
+
   return (
     <Modal
       visible={modalVisible}
       animationType="slide"
       transparent
-      onRequestClose={onClose}
+      onRequestClose={handleCloseModal}
     >
       <View style={styles.overlay}>
         <View style={styles.container}>
           <Text style={styles.heading}>Dodaj ćwiczenie</Text>
 
-          <Picker
-            selectedValue={selectedTemplate}
-            onValueChange={(itemValue: string | number) => setSelectedTemplate(Number(itemValue))}
-            style={styles.picker}
-          >
-            {Array.isArray(templates) && templates.map(template => (
-                <Picker.Item key={template.id} label={template.name} value={template.id} />
-            ))}
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={[
+                styles.searchInput,
+                selectedTemplate && styles.searchInputSelected,
+              ]}
+              placeholder="Wpisz nazwę ćwiczenia..."
+              value={search} 
+              editable={!selectedTemplate} 
+              onChangeText={handleSearch}
+              onFocus={handleInputFocus} 
+              onBlur={handleInputBlur}
+            />
 
-          </Picker>
+            {selectedTemplate && (
+              <TouchableOpacity 
+                style={styles.clearButton} 
+                onPress={handleClear} 
+              >
+                <Text style={styles.clearButtonText}>✖</Text>
+              </TouchableOpacity>
+            )}
+
+            {isListVisible && (
+              <FlatList
+                data={filtered}
+                keyExtractor={(item) => item.id.toString()}
+                style={styles.absoluteList}
+                keyboardShouldPersistTaps="handled" 
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.item}
+                    onPress={() => handleTemplateSelect(item)}
+                  >
+                    <Text style={styles.itemText}>{item.name}</Text>
+                  </TouchableOpacity>
+                )}
+                ListEmptyComponent={
+                  <Text style={styles.noResults}>Brak wyników dla "{search}"</Text>
+                }
+              />
+            )}
+          </View>
 
           <TextInput
             style={styles.input}
@@ -106,6 +142,7 @@ const ExerciseAdd: React.FC<ExerciseAddProps> = ({
             keyboardType="numeric"
             value={sets}
             onChangeText={setSets}
+            editable={!!selectedTemplate}
           />
           <TextInput
             style={styles.input}
@@ -113,20 +150,45 @@ const ExerciseAdd: React.FC<ExerciseAddProps> = ({
             keyboardType="numeric"
             value={reps}
             onChangeText={setReps}
+            editable={!!selectedTemplate}
           />
-          <TextInput
-            style={styles.input}
-            placeholder="Ciężar (opcjonalnie)"
-            keyboardType="numeric"
-            value={weight}
-            onChangeText={setWeight}
-          />
+          <View style={styles.weightRow}>
+            <TextInput
+              style={[styles.input, { flex: 1 }]}
+              placeholder="Ciężar (opcjonalnie)"
+              keyboardType="numeric"
+              value={weight}
+              onChangeText={setWeight}
+              editable={!!selectedTemplate}
+            />
+
+          <View style={styles.switchContainer}>
+            <Text style={[styles.switchLabel, unit === "kg" && styles.switchLabelActive]}>
+            kg
+            </Text>
+            <Switch
+              value={unit === "lbs"}
+              onValueChange={(val) => setUnit(val ? "lbs" : "kg")}
+              disabled={!selectedTemplate}
+            />
+            <Text style={[styles.switchLabel, unit === "lbs" && styles.switchLabelActive]}>
+            lbs
+            </Text>
+          </View>
+          </View>
 
           <View style={styles.buttonRow}>
-            <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <TouchableOpacity 
+              style={[
+                styles.saveButton, 
+                !selectedTemplate && {backgroundColor: '#ccc'}
+              ]} 
+              onPress={handleSave}
+              disabled={!selectedTemplate}
+            >
               <Text style={styles.buttonText}>Zapisz</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+            <TouchableOpacity style={styles.cancelButton} onPress={handleCloseModal}>
               <Text style={styles.buttonText}>Anuluj</Text>
             </TouchableOpacity>
           </View>
@@ -145,6 +207,7 @@ const styles = StyleSheet.create({
   },
   container: {
     width: "90%",
+    maxHeight: "90%",
     backgroundColor: "#fff",
     borderRadius: 12,
     padding: 20,
@@ -153,10 +216,72 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 16,
   },
-  picker: {
-    marginBottom: 12,
+  
+  searchContainer: {
+    zIndex: 10,
+    marginBottom: 16,
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    padding: 10,
+    zIndex: 11, 
+  },
+  searchInputSelected: {
+    backgroundColor: '#f0f0f0', 
+    fontWeight: 'bold',
+    paddingRight: 40, 
+  },
+  
+  clearButton: {
+    position: 'absolute',
+    right: 5,
+    top: 5,
+    height: 40,
+    width: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 12,
+  },
+  clearButtonText: {
+    fontSize: 18,
+    color: '#888',
+    fontWeight: 'bold',
+  },
+
+  absoluteList: {
+    position: 'absolute', 
+    top: 50, 
+    left: 0,
+    right: 0,
+    maxHeight: 180, 
+    borderWidth: 1,
+    borderColor: '#eee',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    padding: 5,
+  },
+
+  item: {
+    padding: 10,
+    borderRadius: 6,
+    marginVertical: 1, 
+  },
+  itemText: {
+    fontSize: 15,
+  },
+  noResults: {
+    textAlign: "center",
+    color: "#888",
+    paddingVertical: 10, 
   },
   input: {
     borderWidth: 1,
@@ -168,6 +293,7 @@ const styles = StyleSheet.create({
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
+    marginTop: 10, 
   },
   cancelButton: {
     flex: 1,
@@ -189,6 +315,24 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
   },
-});
+  weightRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginBottom: 10,
+},
+switchContainer: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginLeft: 10,
+},
+switchLabel: {
+  fontSize: 16,
+  color: "#888",
+  marginHorizontal: 4,
+},
+switchLabelActive: {
+  color: "#000",
+  fontWeight: "bold",
+},
 
-export default ExerciseAdd;
+});

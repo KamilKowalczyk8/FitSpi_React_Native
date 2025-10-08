@@ -1,7 +1,7 @@
 import { SettingsDrawer } from "@/components/SettingsDrawer";
 import { DateSlider } from "@/components/workout/DateSlider";
 import ExerciseList from "@/components/workout/ExerciseList";
-import ExerciseAdd from "@/components/workout/view/ExcerciseAdd.view";
+import { ExerciseAdd } from "@/components/workout/view/ExcerciseAdd.view";
 import WorkoutAdd from "@/components/workout/view/WorkoutAdd.view";
 import WorkoutOptions from "@/components/workout/WorkoutOptions";
 import WorkoutTitle from "@/components/workout/WorkoutTitle";
@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const WorkoutScreen = () => {
-  const { user, token } = useAuth(); 
+  const { user, token } = useAuth();
 
   const [selectedWorkout, setSelectedWorkout] = useState<any | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -23,7 +23,7 @@ const WorkoutScreen = () => {
   const [editingWorkout, setEditingWorkout] = useState<any | null>(null);
 
   const [exerciseModalVisible, setExerciseModalVisible] = useState(false);
-  const [exercises, setExercises] = useState<any[]>([]); 
+  const [exercises, setExercises] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchWorkouts = async () => {
@@ -39,43 +39,86 @@ const WorkoutScreen = () => {
     fetchWorkouts();
   }, [token]);
 
-useEffect(() => {
-  const fetchExercises = async () => {
-    if (!token || !selectedWorkout) return;
-    try {
-      const allExercises = await ExerciseController.getExercises(token);
-      const workoutExercises = allExercises.filter(
-        ex => ex.workoutId === selectedWorkout.id
-      );
-      setExercises(workoutExercises);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  fetchExercises();
-}, [token, selectedWorkout]);
+  useEffect(() => {
+    const fetchExercises = async () => {
+      if (!token || !selectedWorkout) {
+        setExercises([]); 
+        return;
+      }
+      try {
+        const allExercises = await ExerciseController.getExercises(token);
+        const workoutExercises = allExercises.filter(
+          (ex) => ex.workoutId === selectedWorkout.id
+        );
+        setExercises(workoutExercises);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchExercises();
+  }, [token, selectedWorkout]);
 
   useEffect(() => {
-    const workout = workouts.find(w => isSameDay(new Date(w.date), new Date(selectedDate)));
+    const workout = workouts.find((w) =>
+      isSameDay(new Date(w.date), new Date(selectedDate))
+    );
     setSelectedWorkout(workout || null);
   }, [selectedDate, workouts]);
 
-  const handleAddExercise = (exercise: any) => {
-  setExercises((prev) => [...prev, exercise]);
-  };
+  const handleAddExercise = async (exerciseData: any) => {
+    if (!token || !selectedWorkout) {
+      Alert.alert("Błąd", "Nie wybrano treningu, do którego można dodać ćwiczenie.");
+      return;
+    }
 
+    try {
+     
+      const body = {
+        templateId: exerciseData.templateId,
+        sets: exerciseData.sets,
+        reps: exerciseData.reps,
+        weight: exerciseData.weight,
+        weightUnits: exerciseData.weightUnits, 
+        workoutId: selectedWorkout.id,
+        day: new Date(selectedWorkout.date).toLocaleDateString("en-US", { weekday: "long" }).toLowerCase(), 
+      };
+
+
+
+      const savedExercise = await ExerciseController.addExercise(token, body);
+      setExercises((prev) => [...prev, savedExercise]);
+      setExerciseModalVisible(false);
+
+    } catch (error: any) {
+      console.error("Błąd przy dodawaniu ćwiczenia:", error);
+      Alert.alert("Błąd", error.message || "Nie udało się dodać ćwiczenia");
+    }
+  };
   const handleDeleteWorkout = async () => {
     if (!token || !selectedWorkout) return;
 
-    try {
-      await WorkoutController.deleteWorkout(token, selectedWorkout.id);
-      setWorkouts(prev => prev.filter(w => w.id !== selectedWorkout.id));
-      setSelectedWorkout(null);
-      Alert.alert("Sukces", "Trening został usunięty");
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Błąd", "Nie udało się usunąć treningu");
-    }
+    Alert.alert(
+      "Potwierdź usunięcie",
+      "Czy na pewno chcesz usunąć ten trening i wszystkie jego ćwiczenia?",
+      [
+        { text: "Anuluj", style: "cancel" },
+        {
+          text: "Usuń",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await WorkoutController.deleteWorkout(token, selectedWorkout.id);
+              setWorkouts((prev) => prev.filter((w) => w.id !== selectedWorkout.id));
+              setSelectedWorkout(null);
+              Alert.alert("Sukces", "Trening został usunięty");
+            } catch (error) {
+              console.error(error);
+              Alert.alert("Błąd", "Nie udało się usunąć treningu");
+            }
+          },
+        },
+      ]
+    );
   };
 
   const openCreateModal = () => {
@@ -100,48 +143,55 @@ useEffect(() => {
       </View>
 
       {selectedWorkout ? (
-  <>
-    <View style={styles.titleSection}>
-      <View style={styles.titleAbsolute}>
-        <WorkoutTitle title={selectedWorkout.description} />
-      </View>
-      <WorkoutOptions
-        onDeleteWorkout={handleDeleteWorkout}
-        handleEditTitle={openEditModal}
-      />
-    </View>
-     <View style={{ flex: 1, marginTop: 10 }}>
-    <ExerciseList exercises={exercises.map(ex => ({
-      name: ex.template.name,
-      sets: ex.sets,
-      reps: ex.reps,
-      weight: ex.weight,
-    }))} />
-  </View>
+        <>
+          <View style={styles.titleSection}>
+            <View style={styles.titleAbsolute}>
+              <WorkoutTitle title={selectedWorkout.description} />
+            </View>
+            <WorkoutOptions
+              onDeleteWorkout={handleDeleteWorkout}
+              handleEditTitle={openEditModal}
+            />
+          </View>
+          <View style={{ flex: 1, marginTop: 10 }}>
+            <ExerciseList
+              exercises={exercises.map((ex, i) => {
+              if (!ex.template) {
+                console.warn(`⚠️ Exercise ${i} has no template:`, ex);
+              }
+              return {
+                name: ex.name,
+                sets: ex.sets,
+                reps: ex.reps,
+                weight: ex.weight,
+              };
+            })}
+              />
 
-    {/* Sekcja z przyciskiem do dodawania ćwiczeń */}
-    <View style={styles.exerciseAddSection}>
-      <TouchableOpacity
-        onPress={() => setExerciseModalVisible(true)}
-        style={styles.addExerciseButton}
-        >
-        <Text style={styles.addExerciseText}>➕ Dodaj ćwiczenie</Text>
-      </TouchableOpacity>
+          </View>
 
-      <ExerciseAdd
-        modalVisible={exerciseModalVisible}
-        onClose={() => setExerciseModalVisible(false)}
-        onExerciseAdded={handleAddExercise}
-      />
-    </View>
-  </>
-) : (
-  <View style={styles.addSection}>
-    <TouchableOpacity onPress={openCreateModal} style={styles.createButton}>
-      <Text style={{ color: "#fff", fontSize: 18 }}>➕ Stwórz trening</Text>
-    </TouchableOpacity>
-  </View>
-)}
+          <View style={styles.exerciseAddSection}>
+            <TouchableOpacity
+              onPress={() => setExerciseModalVisible(true)}
+              style={styles.addExerciseButton}
+            >
+              <Text style={styles.addExerciseText}>➕ Dodaj ćwiczenie</Text>
+            </TouchableOpacity>
+
+            <ExerciseAdd
+              modalVisible={exerciseModalVisible}
+              onClose={() => setExerciseModalVisible(false)}
+              onExerciseAdded={handleAddExercise}
+            />
+          </View>
+        </>
+      ) : (
+        <View style={styles.addSection}>
+          <TouchableOpacity onPress={openCreateModal} style={styles.createButton}>
+            <Text style={{ color: "#fff", fontSize: 18 }}>➕ Stwórz trening</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       <WorkoutAdd
         modalVisible={modalVisible}
@@ -151,16 +201,24 @@ useEffect(() => {
           if (!token) return;
 
           if (editingWorkout) {
-            const updatedWorkout = await WorkoutController.updateWorkoutDescription(
-              token,
-              editingWorkout.id,
-              title
+            const updatedWorkout =
+              await WorkoutController.updateWorkoutDescription(
+                token,
+                editingWorkout.id,
+                title
+              );
+            setWorkouts((prev) =>
+              prev.map((w) => (w.id === updatedWorkout.id ? updatedWorkout : w))
             );
-            setWorkouts(prev => prev.map(w => w.id === updatedWorkout.id ? updatedWorkout : w));
             setSelectedWorkout(updatedWorkout);
           } else {
-            const newWorkout = await WorkoutController.createWorkout(token, title, selectedDate, 1);
-            setWorkouts(prev => [...prev, newWorkout]);
+            const newWorkout = await WorkoutController.createWorkout(
+              token,
+              title,
+              selectedDate,
+              1 
+            );
+            setWorkouts((prev) => [...prev, newWorkout]);
             setSelectedWorkout(newWorkout);
           }
 
@@ -172,69 +230,72 @@ useEffect(() => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 50,
-    backgroundColor: "#fff",
+ container: {
+ flex: 1,
+ paddingTop: 50,
+ backgroundColor: "#fff",
   },
-  containerdate: {
-    paddingBottom: 10,
-    backgroundColor: "#7fff00",
+ containerdate: {
+ paddingBottom: 10,
+ backgroundColor: "#7fff00",
   },
-  heading: {
-    fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 10,
+ heading: {
+ fontSize: 22,
+ fontWeight: "bold",
+ textAlign: "center",
+ marginBottom: 10,
   },
-  titleSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-end",
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    backgroundColor: "#f0f0f0",
-    position: "relative",
+ titleSection: {
+ flexDirection: "row",
+ alignItems: "center",
+ justifyContent: "flex-end",
+ paddingHorizontal: 15,
+ paddingVertical: 10,
+ backgroundColor: "#f0f0f0",
+ position: "relative",
   },
-  titleAbsolute: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    alignItems: "center",
+ titleAbsolute: {
+ position: "absolute",
+ left: 0,
+ right: 0,
+ alignItems: "center",
   },
-  addSection: {
-    flex: 1, 
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#2d1e83ff",
-    width: "100%",
+ addSection: {
+ flex: 1, 
+ justifyContent: "center",
+ alignItems: "center",
+ backgroundColor: "#2d1e83ff",
+ width: "100%",
   },
-  createButton: {
-    backgroundColor: "#1e90ff",
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    borderRadius: 12,
+ createButton: {
+ backgroundColor: "#1e90ff",
+ paddingVertical: 15,
+ paddingHorizontal: 30,
+ borderRadius: 12,
   },
-  exerciseAddSection: {
-  paddingHorizontal: 16,
-  marginTop: 20,
+ exerciseAddSection: {
+ paddingHorizontal: 16,
+    paddingBottom: 16, // Dodany padding, by przycisk nie był na krawędzi
+ marginTop: 20,
+    alignItems: 'center', // Wycentrowanie przycisku
 },
 
 addExerciseButton: {
-  backgroundColor: "#32CD32",
-  paddingVertical: 16,
-  borderRadius: 12,
-  alignItems: "center",
-  justifyContent: "center",
-  width: "97%", 
+ backgroundColor: "#32CD32",
+ paddingVertical: 16,
+ borderRadius: 12,
+ alignItems: "center",
+ justifyContent: "center",
+ width: "100%", // Przycisk na całą szerokość
 },
 
 addExerciseText: {
-  color: "#fff",
-  fontSize: 18,
-  fontWeight: "bold",
+ color: "#fff",
+ fontSize: 18,
+ fontWeight: "bold",
 },
 
 });
+
 
 export default WorkoutScreen;
