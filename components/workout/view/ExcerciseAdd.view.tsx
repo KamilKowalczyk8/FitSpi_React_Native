@@ -27,6 +27,7 @@ interface ExerciseAddProps {
     weight?: number;
     weightUnits: "kg" | "lbs";
   }) => void;
+  initialData?: any;
 }
 
 export const ExerciseAdd: React.FC<ExerciseAddProps> = ({

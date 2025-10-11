@@ -24,6 +24,8 @@ const WorkoutScreen = () => {
 
   const [exerciseModalVisible, setExerciseModalVisible] = useState(false);
   const [exercises, setExercises] = useState<any[]>([]);
+  
+  const [editingExercise, setEditingExercise] = useState<any | null>(null);
 
   useEffect(() => {
     const fetchWorkouts = async () => {
@@ -42,7 +44,7 @@ const WorkoutScreen = () => {
   useEffect(() => {
     const fetchExercises = async () => {
       if (!token || !selectedWorkout) {
-        setExercises([]); 
+        setExercises([]);
         return;
       }
       try {
@@ -52,7 +54,8 @@ const WorkoutScreen = () => {
         );
         setExercises(workoutExercises);
       } catch (error) {
-        console.error(error);
+        console.error("Błąd przy pobieraniu ćwiczeń:", error);
+        setExercises([]);
       }
     };
     fetchExercises();
@@ -64,39 +67,78 @@ const WorkoutScreen = () => {
     );
     setSelectedWorkout(workout || null);
   }, [selectedDate, workouts]);
-
-  const handleAddExercise = async (exerciseData: any) => {
+  
+  const handleSaveExercise = async (exerciseData: any) => {
     if (!token || !selectedWorkout) {
-      Alert.alert("Błąd", "Nie wybrano treningu, do którego można dodać ćwiczenie.");
+      Alert.alert("Błąd", "Brak wybranego treningu.");
       return;
     }
-
+  
     try {
-     
-      const body = {
-        templateId: exerciseData.templateId,
-        sets: exerciseData.sets,
-        reps: exerciseData.reps,
-        weight: exerciseData.weight,
-        weightUnits: exerciseData.weightUnits, 
-        workoutId: selectedWorkout.id,
-        day: new Date(selectedWorkout.date).toLocaleDateString("en-US", { weekday: "long" }).toLowerCase(), 
-      };
+      if (editingExercise) {
+        console.log("AKTUALIZACJA ĆWICZENIA (placeholder):", editingExercise.id, exerciseData);
+        setExercises(prev => prev.map(ex => ex.id === editingExercise.id ? { ...ex, ...exerciseData } : ex));
+        Alert.alert("Sukces", "Ćwiczenie zaktualizowane");
 
-
-
-      const savedExercise = await ExerciseController.addExercise(token, body);
-      setExercises((prev) => [...prev, savedExercise]);
-      setExerciseModalVisible(false);
-
+      } else {
+        const body = {
+          templateId: exerciseData.templateId,
+          sets: exerciseData.sets,
+          reps: exerciseData.reps,
+          weight: exerciseData.weight,
+          weightUnits: exerciseData.weightUnits,
+          workoutId: selectedWorkout.id,
+          day: new Date(selectedWorkout.date).toLocaleDateString("en-US", { weekday: "long" }).toLowerCase(),
+        };
+        const savedExercise = await ExerciseController.addExercise(token, body);
+        setExercises((prev) => [...prev, savedExercise]);
+      }
     } catch (error: any) {
-      console.error("Błąd przy dodawaniu ćwiczenia:", error);
-      Alert.alert("Błąd", error.message || "Nie udało się dodać ćwiczenia");
+      console.error("Błąd przy zapisywaniu ćwiczenia:", error);
+      Alert.alert("Błąd", error.message || "Nie udało się zapisać ćwiczenia");
+    } finally {
+      setExerciseModalVisible(false);
+      setEditingExercise(null); 
     }
   };
+
+  const handleEditExercise = (exercise: any) => {
+    setEditingExercise(exercise);
+    setExerciseModalVisible(true);
+  };
+
+  const handleDeleteExercise = (exerciseId: string) => {
+    Alert.alert(
+      "Potwierdź usunięcie",
+      "Czy na pewno chcesz usunąć to ćwiczenie?",
+      [
+        { text: "Anuluj", style: "cancel" },
+        { text: "Usuń", style: "destructive", onPress: async () => {
+          try {
+            setExercises(prev => prev.filter(ex => ex.id !== exerciseId));
+            Alert.alert("Sukces", "Ćwiczenie zostało usunięte.");
+          } catch(error) {
+            console.error("Błąd przy usuwaniu ćwiczenia", error);
+            Alert.alert("Błąd", "Nie udało się usunąć ćwiczenia.");
+          }
+        }},
+      ]
+    );
+  };
+
+  const handleCopyExercise = (exercise: any) => {
+    handleSaveExercise({
+      templateId: exercise.templateId,
+      sets: exercise.sets,
+      reps: exercise.reps,
+      weight: exercise.weight,
+      weightUnits: exercise.weightUnits,
+    });
+    Alert.alert("Sukces", "Ćwiczenie zostało skopiowane.");
+  };
+
   const handleDeleteWorkout = async () => {
     if (!token || !selectedWorkout) return;
-
     Alert.alert(
       "Potwierdź usunięcie",
       "Czy na pewno chcesz usunąć ten trening i wszystkie jego ćwiczenia?",
@@ -155,19 +197,11 @@ const WorkoutScreen = () => {
           </View>
           <View style={{ flex: 1, marginTop: 10 }}>
             <ExerciseList
-              exercises={exercises.map((ex, i) => {
-              if (!ex.template) {
-                console.warn(`⚠️ Exercise ${i} has no template:`, ex);
-              }
-              return {
-                name: ex.name,
-                sets: ex.sets,
-                reps: ex.reps,
-                weight: ex.weight,
-              };
-            })}
-              />
-
+              exercises={exercises} 
+              onEditExercise={handleEditExercise}
+              onDeleteExercise={handleDeleteExercise}
+              onCopyExercise={handleCopyExercise}
+            />
           </View>
 
           <View style={styles.exerciseAddSection}>
@@ -180,8 +214,12 @@ const WorkoutScreen = () => {
 
             <ExerciseAdd
               modalVisible={exerciseModalVisible}
-              onClose={() => setExerciseModalVisible(false)}
-              onExerciseAdded={handleAddExercise}
+              onClose={() => {
+                setExerciseModalVisible(false);
+                setEditingExercise(null); 
+              }}
+              onExerciseAdded={handleSaveExercise} 
+              initialData={editingExercise} 
             />
           </View>
         </>
@@ -199,29 +237,15 @@ const WorkoutScreen = () => {
         onClose={() => setModalVisible(false)}
         onWorkoutCreated={async (title) => {
           if (!token) return;
-
           if (editingWorkout) {
-            const updatedWorkout =
-              await WorkoutController.updateWorkoutDescription(
-                token,
-                editingWorkout.id,
-                title
-              );
-            setWorkouts((prev) =>
-              prev.map((w) => (w.id === updatedWorkout.id ? updatedWorkout : w))
-            );
+            const updatedWorkout = await WorkoutController.updateWorkoutDescription(token, editingWorkout.id, title);
+            setWorkouts((prev) => prev.map((w) => (w.id === updatedWorkout.id ? updatedWorkout : w)));
             setSelectedWorkout(updatedWorkout);
           } else {
-            const newWorkout = await WorkoutController.createWorkout(
-              token,
-              title,
-              selectedDate,
-              1 
-            );
+            const newWorkout = await WorkoutController.createWorkout(token, title, selectedDate, 1);
             setWorkouts((prev) => [...prev, newWorkout]);
             setSelectedWorkout(newWorkout);
           }
-
           setModalVisible(false);
         }}
       />
@@ -230,72 +254,68 @@ const WorkoutScreen = () => {
 };
 
 const styles = StyleSheet.create({
- container: {
- flex: 1,
- paddingTop: 50,
- backgroundColor: "#fff",
+  container: {
+    flex: 1,
+    paddingTop: 50,
+    backgroundColor: "#fff",
   },
- containerdate: {
- paddingBottom: 10,
- backgroundColor: "#7fff00",
+  containerdate: {
+    paddingBottom: 10,
+    backgroundColor: "#7fff00",
   },
- heading: {
- fontSize: 22,
- fontWeight: "bold",
- textAlign: "center",
- marginBottom: 10,
+  heading: {
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 10,
   },
- titleSection: {
- flexDirection: "row",
- alignItems: "center",
- justifyContent: "flex-end",
- paddingHorizontal: 15,
- paddingVertical: 10,
- backgroundColor: "#f0f0f0",
- position: "relative",
+  titleSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    backgroundColor: "#f0f0f0",
+    position: "relative",
   },
- titleAbsolute: {
- position: "absolute",
- left: 0,
- right: 0,
- alignItems: "center",
+  titleAbsolute: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    alignItems: "center",
   },
- addSection: {
- flex: 1, 
- justifyContent: "center",
- alignItems: "center",
- backgroundColor: "#2d1e83ff",
- width: "100%",
+  addSection: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#2d1e83ff",
+    width: "100%",
   },
- createButton: {
- backgroundColor: "#1e90ff",
- paddingVertical: 15,
- paddingHorizontal: 30,
- borderRadius: 12,
+  createButton: {
+    backgroundColor: "#1e90ff",
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 12,
   },
- exerciseAddSection: {
- paddingHorizontal: 16,
-    paddingBottom: 16, // Dodany padding, by przycisk nie był na krawędzi
- marginTop: 20,
-    alignItems: 'center', // Wycentrowanie przycisku
-},
-
-addExerciseButton: {
- backgroundColor: "#32CD32",
- paddingVertical: 16,
- borderRadius: 12,
- alignItems: "center",
- justifyContent: "center",
- width: "100%", // Przycisk na całą szerokość
-},
-
-addExerciseText: {
- color: "#fff",
- fontSize: 18,
- fontWeight: "bold",
-},
-
+  exerciseAddSection: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  addExerciseButton: {
+    backgroundColor: "#32CD32",
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+  },
+  addExerciseText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
 });
-
 
 export default WorkoutScreen;
