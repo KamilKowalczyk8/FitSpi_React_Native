@@ -23,4 +23,15 @@ export const ExerciseController = {
     if (!response.ok) throw new Error(result.message || "Nie udało się dodać ćwiczenia");
     return result as ExerciseResponse;
   },
+
+  deleteExercise: async (token: string, id: number): Promise<{ success: boolean }> => {
+  const API_URL = process.env.EXPO_PUBLIC_API_URL;
+  const response = await fetch(`${API_URL}/exercises/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || "Nie udało się usunąć ćwiczenia");
+  return result as { success: boolean };
+  },
 };

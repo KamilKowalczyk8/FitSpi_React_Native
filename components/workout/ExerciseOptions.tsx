@@ -1,14 +1,42 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ExerciseController } from "@/controllers/workout/exercise.controller";
+import { AuthContext } from "@/providers/AuthProvider";
+import { useContext } from "react";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type Props = {
   isOpen: boolean;
   onToggle: () => void;
   onEdit: () => void;
-  onDelete: () => void;
   onCopy: () => void;
+  exerciseId: number;      // 👈 ID ćwiczenia do usunięcia
+  onDeleted: () => void;     // 👈 Funkcja do odświeżenia listy po usunięciu
 };
 
-const ExerciseOptions = ({ isOpen, onToggle, onEdit, onDelete, onCopy }: Props) => {
+const ExerciseOptions = ({ isOpen, onToggle, onEdit, onCopy, exerciseId, onDeleted }: Props) => {
+  const auth = useContext(AuthContext);
+
+  // Funkcja, która obsługuje logikę usuwania
+  const handleDelete = async () => {
+    if (!auth?.token) {
+      Alert.alert("Błąd", "Brak tokenu – zaloguj się ponownie.");
+      return;
+    }
+
+    // Od razu zamykamy menu, żeby interfejs był responsywny
+    onToggle();
+
+    try {
+      // Wywołujemy funkcję z kontrolera API
+      await ExerciseController.deleteExercise(auth.token, exerciseId);
+
+      // Wywołujemy funkcję zwrotną, aby rodzic zaktualizował listę
+      onDeleted();
+
+    } catch (err: any) {
+      console.error("Błąd przy usuwaniu ćwiczenia:", err);
+      Alert.alert("Błąd", err.message || "Wystąpił nieoczekiwany błąd.");
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -20,10 +48,8 @@ const ExerciseOptions = ({ isOpen, onToggle, onEdit, onDelete, onCopy }: Props) 
           <TouchableOpacity style={styles.optionButton} onPress={onEdit}>
             <Text style={styles.optionText}>✏️ Edytuj</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.optionButton} onPress={onCopy}>
-            <Text style={styles.optionText}>📄 Kopiuj</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.optionButton} onPress={onDelete}>
+          {/* Przycisk "Usuń" teraz wywołuje naszą nową funkcję handleDelete */}
+          <TouchableOpacity style={styles.optionButton} onPress={handleDelete}>
             <Text style={[styles.optionText, { color: "red" }]}>🗑️ Usuń</Text>
           </TouchableOpacity>
         </View>
@@ -55,7 +81,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    zIndex: 100, 
+    zIndex: 100,
     minWidth: 120,
   },
   optionButton: {

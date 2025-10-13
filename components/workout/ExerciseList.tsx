@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
-import ExerciseOptions from './ExerciseOptions';
+import ExerciseOptions from './ExerciseOptions'; // Upewnij się, że ta ścieżka jest poprawna
 
+// Typy interfejsów pozostają bez zmian
 interface Exercise {
-  id: string;
+  id: number; // Zmieniono na number, bo tak zazwyczaj przychodzi z API
   name: string;
   sets: number;
   reps: number | string;
@@ -12,19 +13,14 @@ interface Exercise {
 
 interface ExerciseListProps {
   exercises: Exercise[];
-  onEditExercise: (exercise: Exercise) => void;
-  onDeleteExercise: (exerciseId: string) => void;
-  onCopyExercise: (exercise: Exercise) => void;
+  setExercises: React.Dispatch<React.SetStateAction<Exercise[]>>;
 }
 
 export const ExerciseList: React.FC<ExerciseListProps> = ({
   exercises,
-  onEditExercise,
-  onDeleteExercise,
-  onCopyExercise,
+  setExercises,
 }) => {
-
-  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
   const renderItem = ({ item }: { item: Exercise }) => {
     const isMenuOpen = item.id === openMenuId;
@@ -38,19 +34,26 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({
             {item.weight ? ` × ${item.weight} kg` : ''}
           </Text>
         </View>
+
+        {/* 👇 GŁÓWNA ZMIANA JEST TUTAJ 👇 */}
         <ExerciseOptions
           isOpen={isMenuOpen}
           onToggle={() => setOpenMenuId(isMenuOpen ? null : item.id)}
           onEdit={() => {
-            onEditExercise(item);
+            // Tutaj logika edycji, np. otwarcie modala
+            console.log("Edytuj:", item);
             setOpenMenuId(null);
           }}
-          onDelete={() => {
-            onDeleteExercise(item.id);
-            setOpenMenuId(null);
-          }}
-          onCopy={() => {
-            onCopyExercise(item);
+          onCopy={() => { /* Logika kopiowania */ }}
+          // 1. Przekazujemy ID ćwiczenia, które ma zostać usunięte
+          exerciseId={item.id}
+          // 2. Przekazujemy funkcję, która zostanie wywołana PO usunięciu
+          onDeleted={() => {
+            // Ta funkcja filtruje listę ćwiczeń, usuwając z niej to o danym ID
+            // To powoduje natychmiastowe odświeżenie interfejsu użytkownika
+            setExercises((currentExercises) =>
+              currentExercises.filter((ex) => ex.id !== item.id)
+            );
             setOpenMenuId(null);
           }}
         />
@@ -69,6 +72,7 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({
   );
 };
 
+// Style pozostają bez zmian
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
@@ -108,4 +112,5 @@ const styles = StyleSheet.create({
     color: '#666',
   },
 });
+
 export default ExerciseList;

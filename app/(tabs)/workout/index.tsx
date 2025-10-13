@@ -197,10 +197,8 @@ const WorkoutScreen = () => {
           </View>
           <View style={{ flex: 1, marginTop: 10 }}>
             <ExerciseList
-              exercises={exercises} 
-              onEditExercise={handleEditExercise}
-              onDeleteExercise={handleDeleteExercise}
-              onCopyExercise={handleCopyExercise}
+              exercises={exercises}
+              setExercises={setExercises}
             />
           </View>
 
