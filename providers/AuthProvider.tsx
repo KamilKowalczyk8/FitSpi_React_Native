@@ -7,7 +7,6 @@ type User = {
   first_name: string;
   last_name: string;
 };
-
 type AuthContextType = {
   user: User | null;
   token: string | null;
@@ -74,7 +73,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const data = await response.json();
       if (data.user) {
         setUser(data.user);
-        if (data.access_token) setToken(data.access_token); // <-- nowość
+        if (data.access_token) setToken(data.access_token); 
         return true;
       }
       return false;

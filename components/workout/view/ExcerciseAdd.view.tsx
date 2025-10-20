@@ -1,5 +1,5 @@
 import { useExerciseSearch } from '@/hooks/useExerciseSearch';
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   Modal,
@@ -34,6 +34,7 @@ export const ExerciseAdd: React.FC<ExerciseAddProps> = ({
   modalVisible,
   onClose,
   onExerciseAdded,
+  initialData,
 }) => {
   const {
     filtered,
@@ -53,6 +54,24 @@ export const ExerciseAdd: React.FC<ExerciseAddProps> = ({
   const [reps, setReps] = useState("");
   const [weight, setWeight] = useState("");
   const [unit, setUnit] = useState<"kg" | "lbs">("kg");
+
+useEffect(() => {
+    if (modalVisible && initialData) {
+      
+      const template = {
+        id: initialData.templateId,
+        name: initialData.name,
+      };
+      setSelectedTemplate(template);
+      setSearch(initialData.name); 
+
+      setSets(String(initialData.sets || ""));
+      setReps(String(initialData.reps || ""));
+      setWeight(String(initialData.weight || ""));
+      setUnit(initialData.weightUnits || "kg");
+    }
+
+  }, [modalVisible, initialData, setSelectedTemplate, setSearch]);
 
   const handleSave = () => {
     if (!selectedTemplate || !sets || !reps) return;

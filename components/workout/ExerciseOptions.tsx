@@ -8,28 +8,22 @@ type Props = {
   onToggle: () => void;
   onEdit: () => void;
   onCopy: () => void;
-  exerciseId: number;      // 👈 ID ćwiczenia do usunięcia
-  onDeleted: () => void;     // 👈 Funkcja do odświeżenia listy po usunięciu
+  exerciseId: number;      
+  onDeleted: () => void;     
 };
 
 const ExerciseOptions = ({ isOpen, onToggle, onEdit, onCopy, exerciseId, onDeleted }: Props) => {
   const auth = useContext(AuthContext);
 
-  // Funkcja, która obsługuje logikę usuwania
   const handleDelete = async () => {
     if (!auth?.token) {
       Alert.alert("Błąd", "Brak tokenu – zaloguj się ponownie.");
       return;
     }
-
-    // Od razu zamykamy menu, żeby interfejs był responsywny
     onToggle();
 
     try {
-      // Wywołujemy funkcję z kontrolera API
       await ExerciseController.deleteExercise(auth.token, exerciseId);
-
-      // Wywołujemy funkcję zwrotną, aby rodzic zaktualizował listę
       onDeleted();
 
     } catch (err: any) {
@@ -48,7 +42,6 @@ const ExerciseOptions = ({ isOpen, onToggle, onEdit, onCopy, exerciseId, onDelet
           <TouchableOpacity style={styles.optionButton} onPress={onEdit}>
             <Text style={styles.optionText}>✏️ Edytuj</Text>
           </TouchableOpacity>
-          {/* Przycisk "Usuń" teraz wywołuje naszą nową funkcję handleDelete */}
           <TouchableOpacity style={styles.optionButton} onPress={handleDelete}>
             <Text style={[styles.optionText, { color: "red" }]}>🗑️ Usuń</Text>
           </TouchableOpacity>

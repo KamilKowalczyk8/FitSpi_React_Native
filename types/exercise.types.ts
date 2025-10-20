@@ -2,6 +2,7 @@
 export interface ExerciseResponse {
   id: number;
   name: string;
+  templateId: number;
   sets: number;
   reps: number;
   weight: number;

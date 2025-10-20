@@ -4,9 +4,10 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 type Props = {
   onDeleteWorkout: () => void;
   handleEditTitle: () => void;
+  handleCopyWorkout?: () => void;
 };
 
-const WorkoutOptions = ({ onDeleteWorkout, handleEditTitle }: Props) => {
+const WorkoutOptions = ({ onDeleteWorkout, handleEditTitle, handleCopyWorkout, }: Props) => {
   const [open, setOpen] = useState(false);
 
   const toggleOptions = () => setOpen(!open);
@@ -23,19 +24,17 @@ const WorkoutOptions = ({ onDeleteWorkout, handleEditTitle }: Props) => {
 
   return (
     <View style={styles.container}>
-      {/* 🔹 Przycisk */}
       <TouchableOpacity style={styles.button} onPress={toggleOptions}>
         <Text style={styles.buttonText}>⚙️</Text>
       </TouchableOpacity>
 
-      {/* 🔹 Dymek z opcjami */}
       {open && (
         <View style={styles.dropdown}>
           <TouchableOpacity style={styles.optionButton} onPress={handleEditAndClose}>
             <Text style={styles.optionText}>✏️ Zmień tytuł</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.optionButton}>
+          <TouchableOpacity style={styles.optionButton} onPress={handleCopyWorkout}>
             <Text style={styles.optionText}>🏋️‍♂️ Kopiuj trening</Text>
           </TouchableOpacity>
 

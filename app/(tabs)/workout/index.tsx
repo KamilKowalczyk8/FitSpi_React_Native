@@ -1,6 +1,7 @@
 import { SettingsDrawer } from "@/components/SettingsDrawer";
 import { DateSlider } from "@/components/workout/DateSlider";
 import ExerciseList from "@/components/workout/ExerciseList";
+import CopyWorkoutModal from "@/components/workout/view/CopyWorkoutModal";
 import { ExerciseAdd } from "@/components/workout/view/ExcerciseAdd.view";
 import WorkoutAdd from "@/components/workout/view/WorkoutAdd.view";
 import WorkoutOptions from "@/components/workout/WorkoutOptions";
@@ -8,25 +9,30 @@ import WorkoutTitle from "@/components/workout/WorkoutTitle";
 import { ExerciseController } from "@/controllers/workout/exercise.controller";
 import { WorkoutController } from "@/controllers/workout/workout.controller";
 import { useAuth } from "@/hooks/useAuth";
+import { useWorkoutCopy } from "@/hooks/useWorkoutCopy";
+import { Workout } from "@/models/Workout";
+import { ExerciseResponse } from "@/types/exercise.types";
 import { isSameDay } from "date-fns";
 import { useEffect, useState } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const WorkoutScreen = () => {
   const { user, token } = useAuth();
+  const { isCopying, copyWorkout } = useWorkoutCopy(token);
 
-  const [selectedWorkout, setSelectedWorkout] = useState<any | null>(null);
+  const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [workouts, setWorkouts] = useState<any[]>([]);
+  const [workouts, setWorkouts] = useState<Workout[]>([]);
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [editingWorkout, setEditingWorkout] = useState<any | null>(null);
+  const [editingWorkout, setEditingWorkout] = useState<Workout | null>(null);
+  const [isCopyModalVisible, setCopyModalVisible] = useState(false);
 
   const [exerciseModalVisible, setExerciseModalVisible] = useState(false);
-  const [exercises, setExercises] = useState<any[]>([]);
-  
-  const [editingExercise, setEditingExercise] = useState<any | null>(null);
+  const [exercises, setExercises] = useState<ExerciseResponse[]>([]);
+  const [editingExercise, setEditingExercise] = useState<ExerciseResponse | null>(null);
 
+  // Pobieranie treningów
   useEffect(() => {
     const fetchWorkouts = async () => {
       if (!token) return;
@@ -41,6 +47,7 @@ const WorkoutScreen = () => {
     fetchWorkouts();
   }, [token]);
 
+  // Pobieranie ćwiczeń dla wybranego treningu
   useEffect(() => {
     const fetchExercises = async () => {
       if (!token || !selectedWorkout) {
@@ -61,25 +68,39 @@ const WorkoutScreen = () => {
     fetchExercises();
   }, [token, selectedWorkout]);
 
+  // Wybieranie treningu dla wybranej daty
   useEffect(() => {
     const workout = workouts.find((w) =>
       isSameDay(new Date(w.date), new Date(selectedDate))
     );
     setSelectedWorkout(workout || null);
   }, [selectedDate, workouts]);
-  
+
+  // Zapisywanie / edycja ćwiczenia
   const handleSaveExercise = async (exerciseData: any) => {
     if (!token || !selectedWorkout) {
       Alert.alert("Błąd", "Brak wybranego treningu.");
       return;
     }
-  
+
     try {
       if (editingExercise) {
-        console.log("AKTUALIZACJA ĆWICZENIA (placeholder):", editingExercise.id, exerciseData);
-        setExercises(prev => prev.map(ex => ex.id === editingExercise.id ? { ...ex, ...exerciseData } : ex));
-        Alert.alert("Sukces", "Ćwiczenie zaktualizowane");
+        const body = {
+          sets: exerciseData.sets,
+          reps: exerciseData.reps,
+          weight: exerciseData.weight,
+          weightUnits: exerciseData.weightUnits,
+        };
+        const updatedExercise = await ExerciseController.updateExercise(
+          token,
+          editingExercise.id,
+          body
+        );
 
+        setExercises((prev) =>
+          prev.map((ex) => (ex.id === editingExercise.id ? updatedExercise : ex))
+        );
+        Alert.alert("Sukces", "Ćwiczenie zaktualizowane");
       } else {
         const body = {
           templateId: exerciseData.templateId,
@@ -88,7 +109,9 @@ const WorkoutScreen = () => {
           weight: exerciseData.weight,
           weightUnits: exerciseData.weightUnits,
           workoutId: selectedWorkout.id,
-          day: new Date(selectedWorkout.date).toLocaleDateString("en-US", { weekday: "long" }).toLowerCase(),
+          day: new Date(selectedWorkout.date)
+            .toLocaleDateString("en-US", { weekday: "long" })
+            .toLowerCase(),
         };
         const savedExercise = await ExerciseController.addExercise(token, body);
         setExercises((prev) => [...prev, savedExercise]);
@@ -98,43 +121,13 @@ const WorkoutScreen = () => {
       Alert.alert("Błąd", error.message || "Nie udało się zapisać ćwiczenia");
     } finally {
       setExerciseModalVisible(false);
-      setEditingExercise(null); 
+      setEditingExercise(null);
     }
   };
 
-  const handleEditExercise = (exercise: any) => {
+  const handleEditExercise = (exercise: ExerciseResponse) => {
     setEditingExercise(exercise);
     setExerciseModalVisible(true);
-  };
-
-  const handleDeleteExercise = (exerciseId: string) => {
-    Alert.alert(
-      "Potwierdź usunięcie",
-      "Czy na pewno chcesz usunąć to ćwiczenie?",
-      [
-        { text: "Anuluj", style: "cancel" },
-        { text: "Usuń", style: "destructive", onPress: async () => {
-          try {
-            setExercises(prev => prev.filter(ex => ex.id !== exerciseId));
-            Alert.alert("Sukces", "Ćwiczenie zostało usunięte.");
-          } catch(error) {
-            console.error("Błąd przy usuwaniu ćwiczenia", error);
-            Alert.alert("Błąd", "Nie udało się usunąć ćwiczenia.");
-          }
-        }},
-      ]
-    );
-  };
-
-  const handleCopyExercise = (exercise: any) => {
-    handleSaveExercise({
-      templateId: exercise.templateId,
-      sets: exercise.sets,
-      reps: exercise.reps,
-      weight: exercise.weight,
-      weightUnits: exercise.weightUnits,
-    });
-    Alert.alert("Sukces", "Ćwiczenie zostało skopiowane.");
   };
 
   const handleDeleteWorkout = async () => {
@@ -150,7 +143,9 @@ const WorkoutScreen = () => {
           onPress: async () => {
             try {
               await WorkoutController.deleteWorkout(token, selectedWorkout.id);
-              setWorkouts((prev) => prev.filter((w) => w.id !== selectedWorkout.id));
+              setWorkouts((prev) =>
+                prev.filter((w) => w.id !== selectedWorkout.id)
+              );
               setSelectedWorkout(null);
               Alert.alert("Sukces", "Trening został usunięty");
             } catch (error) {
@@ -174,6 +169,23 @@ const WorkoutScreen = () => {
     setModalVisible(true);
   };
 
+  const handleOpenCopyModal = () => {
+    if (!selectedWorkout) return;
+    setCopyModalVisible(true);
+  };
+
+  const handleConfirmCopy = async (targetDate: Date) => {
+    if (isCopying || !selectedWorkout) return;
+    setCopyModalVisible(false);
+
+    const newWorkout = await copyWorkout(selectedWorkout, exercises, targetDate);
+
+    if (newWorkout) {
+      setWorkouts((prev) => [...prev, newWorkout]);
+      setSelectedDate(targetDate);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <SettingsDrawer />
@@ -188,17 +200,20 @@ const WorkoutScreen = () => {
         <>
           <View style={styles.titleSection}>
             <View style={styles.titleAbsolute}>
-              <WorkoutTitle title={selectedWorkout.description} />
+              <WorkoutTitle title={selectedWorkout.description || ""} />
             </View>
             <WorkoutOptions
               onDeleteWorkout={handleDeleteWorkout}
               handleEditTitle={openEditModal}
+              handleCopyWorkout={handleOpenCopyModal}
             />
           </View>
+
           <View style={{ flex: 1, marginTop: 10 }}>
             <ExerciseList
               exercises={exercises}
               setExercises={setExercises}
+              onEdit={handleEditExercise}
             />
           </View>
 
@@ -214,10 +229,10 @@ const WorkoutScreen = () => {
               modalVisible={exerciseModalVisible}
               onClose={() => {
                 setExerciseModalVisible(false);
-                setEditingExercise(null); 
+                setEditingExercise(null);
               }}
-              onExerciseAdded={handleSaveExercise} 
-              initialData={editingExercise} 
+              onExerciseAdded={handleSaveExercise}
+              initialData={editingExercise}
             />
           </View>
         </>
@@ -236,16 +251,33 @@ const WorkoutScreen = () => {
         onWorkoutCreated={async (title) => {
           if (!token) return;
           if (editingWorkout) {
-            const updatedWorkout = await WorkoutController.updateWorkoutDescription(token, editingWorkout.id, title);
-            setWorkouts((prev) => prev.map((w) => (w.id === updatedWorkout.id ? updatedWorkout : w)));
+            const updatedWorkout = await WorkoutController.updateWorkoutDescription(
+              token,
+              editingWorkout.id,
+              title
+            );
+            setWorkouts((prev) =>
+              prev.map((w) => (w.id === updatedWorkout.id ? updatedWorkout : w))
+            );
             setSelectedWorkout(updatedWorkout);
           } else {
-            const newWorkout = await WorkoutController.createWorkout(token, title, selectedDate, 1);
+            const newWorkout = await WorkoutController.createWorkout(
+              token,
+              title,
+              selectedDate,
+              1
+            );
             setWorkouts((prev) => [...prev, newWorkout]);
             setSelectedWorkout(newWorkout);
           }
           setModalVisible(false);
         }}
+      />
+
+      <CopyWorkoutModal
+        isVisible={isCopyModalVisible}
+        onClose={() => setCopyModalVisible(false)}
+        onConfirm={handleConfirmCopy}
       />
     </View>
   );
@@ -299,7 +331,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 16,
     marginTop: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   addExerciseButton: {
     backgroundColor: "#32CD32",
