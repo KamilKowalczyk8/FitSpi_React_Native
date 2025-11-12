@@ -3,22 +3,28 @@ import { useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import React, { useState } from "react";
 import {
-    Animated,
-    Dimensions,
-    Modal,
-    Pressable,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Animated,
+  Dimensions,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
+
+import { useAuth } from "@/hooks/useAuth";
+import InvitationsModal from "./coach/InvitationsModal";
 
 const { width } = Dimensions.get("window");
 
 export const SettingsDrawer: React.FC = () => {
   const [visible, setVisible] = useState(false);
   const [slideAnim] = useState(new Animated.Value(width));
+  const [invitationsVisible, setInvitationsVisible] = useState(false);
+
   const router = useRouter();
+  const { user } = useAuth();
 
   const toggleDrawer = () => {
     if (visible) {
@@ -38,34 +44,36 @@ export const SettingsDrawer: React.FC = () => {
   };
 
   const handleLogout = async () => {
-    // usuń token z SecureStore
     await SecureStore.deleteItemAsync("accessToken");
-    await SecureStore.deleteItemAsync("refreshToken");
-
-    // zamknij panel
     toggleDrawer();
+    router.replace("/(auth)/login");
+  };
 
-    // przenieś na ekran logowania
-    router.replace("/(auth)/login/login");
+  const openInvitationsModal = () => {
+    toggleDrawer();
+    setTimeout(() => setInvitationsVisible(true), 300);
   };
 
   return (
     <View style={styles.container}>
-      {/* Ikona koła zębatego */}
       <TouchableOpacity onPress={toggleDrawer} style={styles.gearButton}>
         <Ionicons name="settings-outline" size={28} color="#000" />
       </TouchableOpacity>
 
-      {/* Panel boczny */}
       <Modal transparent visible={visible} animationType="none">
         <Pressable style={styles.overlay} onPress={toggleDrawer} />
         <Animated.View
-          style={[
-            styles.drawer,
-            { transform: [{ translateX: slideAnim }] },
-          ]}
+          style={[styles.drawer, { transform: [{ translateX: slideAnim }] }]}
         >
           <Text style={styles.drawerTitle}>Opcje</Text>
+
+            <TouchableOpacity
+              style={styles.optionButton}
+              onPress={openInvitationsModal}
+            >
+              <Text style={styles.optionText}>📬 Zaproszenia</Text>
+            </TouchableOpacity>
+          
 
           <TouchableOpacity style={styles.optionButton}>
             <Text style={styles.optionText}>⚙️ Ustawienia</Text>
@@ -76,6 +84,11 @@ export const SettingsDrawer: React.FC = () => {
           </TouchableOpacity>
         </Animated.View>
       </Modal>
+
+      <InvitationsModal
+        visible={invitationsVisible}
+        onClose={() => setInvitationsVisible(false)}
+      />
     </View>
   );
 };
@@ -101,21 +114,26 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     right: 0,
-    width: width * 0.6,
+    width: width * 0.7,
     height: "100%",
     backgroundColor: "#fff",
     padding: 20,
+    paddingTop: 60,
     elevation: 8,
   },
   drawerTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "bold",
     marginBottom: 20,
   },
   optionButton: {
-    paddingVertical: 12,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
   },
   optionText: {
     fontSize: 18,
   },
 });
+
+export default SettingsDrawer;

@@ -6,6 +6,10 @@ type User = {
   email: string;
   first_name: string;
   last_name: string;
+  role_id: number; 
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 };
 type AuthContextType = {
   user: User | null;
@@ -94,8 +98,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, rememberMe }),
     });
-console.log('RESPONSE STATUS:', response.status);
-console.log('RESPONSE HEADERS:', response.headers);
+    console.log('RESPONSE STATUS:', response.status);
+    console.log('RESPONSE HEADERS:', response.headers);
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Login failed:', errorText);

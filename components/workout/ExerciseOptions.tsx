@@ -7,12 +7,11 @@ type Props = {
   isOpen: boolean;
   onToggle: () => void;
   onEdit: () => void;
-  onCopy: () => void;
   exerciseId: number;      
   onDeleted: () => void;     
 };
 
-const ExerciseOptions = ({ isOpen, onToggle, onEdit, onCopy, exerciseId, onDeleted }: Props) => {
+const ExerciseOptions = ({ isOpen, onToggle, onEdit, exerciseId, onDeleted }: Props) => {
   const auth = useContext(AuthContext);
 
   const handleDelete = async () => {

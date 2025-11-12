@@ -28,3 +28,7 @@ export const registerSchema = z
     message: 'Hasła muszą być identyczne',
     path: ['confirmPassword'],
   });
+  
+export const addClientSchema = z.object({
+  email: z.string().email("Niepoprawny format e-mail"),
+});

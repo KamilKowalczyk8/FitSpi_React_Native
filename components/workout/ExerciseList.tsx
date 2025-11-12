@@ -36,9 +36,7 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({
             onEdit(item);
             setOpenMenuId(null);
           }}
-          onCopy={() => {
-            /* Logika kopiowania */
-          }}
+          
           exerciseId={item.id}
           onDeleted={() => {
             setExercises((currentExercises) =>

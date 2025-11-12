@@ -46,6 +46,23 @@ export const WorkoutController = {
     return result;
   },
 
+  getClientWorkouts: async (token: string, clientId: number) => {
+    const API_URL = process.env.EXPO_PUBLIC_API_URL;
+    if (!token) throw new Error("Brak tokena!");
+
+    const response = await fetch(`${API_URL}/workouts/user/${clientId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.message || "Nie udało się pobrać treningów klienta");
+    }
+    return result;
+  },
+
 
 deleteWorkout: async (token: string, workoutId: number) => {
     const API_URL = process.env.EXPO_PUBLIC_API_URL;
