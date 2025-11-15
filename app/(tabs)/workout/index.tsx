@@ -32,7 +32,6 @@ const WorkoutScreen = () => {
   const [exercises, setExercises] = useState<ExerciseResponse[]>([]);
   const [editingExercise, setEditingExercise] = useState<ExerciseResponse | null>(null);
 
-  // Pobieranie treningów
   useEffect(() => {
     const fetchWorkouts = async () => {
       if (!token) return;
@@ -47,7 +46,6 @@ const WorkoutScreen = () => {
     fetchWorkouts();
   }, [token]);
 
-  // Pobieranie ćwiczeń dla wybranego treningu
   useEffect(() => {
     const fetchExercises = async () => {
       if (!token || !selectedWorkout) {
