@@ -1,4 +1,39 @@
 export const WorkoutController = {
+
+  createWorkoutForClient: async (
+    token: string,
+    clientId: number,
+    description: string,
+    date?: Date,
+    workout_type = 1
+  ) => {
+    const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
+    if (!token) throw new Error("Brak tokena!");
+    if (!clientId) throw new Error("Brak klienta!");
+
+    const response = await fetch(`${API_URL}/workouts/user/${clientId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        description,
+        workout_type,
+        date: (date ?? new Date()).toLocaleDateString("sv-SE"),
+      }),
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.message || "Nie udało się utworzyć treningu dla klienta");
+    }
+
+    return result;
+  },
+
+
   createWorkout: async (
     token: string, 
     description: string, 

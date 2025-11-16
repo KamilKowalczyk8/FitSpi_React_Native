@@ -1,60 +1,75 @@
 import { ClientResponse } from '@/controllers/coach/clientLink.controller';
 import React from 'react';
 import {
-    FlatList,
-    Modal,
-    Pressable,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  FlatList,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
-interface ClientWorkoutsModalProps {
+import { useClientWorkoutsController } from "@/hooks/useClientWorkoutsController";
+import { WorkoutItem } from "@/models/Workout";
+
+interface Props {
   visible: boolean;
   onClose: () => void;
   client: ClientResponse;
+  onCreateWorkout: () => void;
+  refreshAfterCreate: boolean;
 }
 
+const ClientWorkoutsModal: React.FC<Props> = ({
+  visible,
+  onClose,
+  client,
+  onCreateWorkout,
+  refreshAfterCreate,
+}) => {
 
-const MOCK_WORKOUTS = [
-  { id: '1', name: 'Trening A - Klatka/Triceps' },
-  { id: '2', name: 'Trening B - Plecy/Biceps' },
-  { id: '3', name: 'Trening C - Nogi/Barki' },
-];
-
-const ClientWorkoutsModal: React.FC<ClientWorkoutsModalProps> = ({ visible, onClose, client }) => {
-  
-  const handleCreateNew = () => {
-    onClose(); // Zamknij ten modal
-    // Tutaj nawiguj do ekranu tworzenia treningu, przekazując ID klienta
-    console.log(`Rozpocznij tworzenie nowego treningu dla: ${client.user_id}`);
-  };
+  const { workouts, loading, error } =
+    useClientWorkoutsController(client, visible);
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent animationType="fade">
       <Pressable style={styles.overlay} onPress={onClose}>
         <Pressable style={styles.container}>
-          <Text style={styles.title}>Treningi dla</Text>
-          <Text style={styles.clientName}>{client.first_name} {client.last_name}</Text>
-          
-          <FlatList
-            data={MOCK_WORKOUTS}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <View style={styles.workoutTile}>
-                <Text style={styles.workoutName}>{item.name}</Text>
-              </View>
-            )}
-            ListEmptyComponent={<Text style={styles.emptyText}>Ten podopieczny nie ma jeszcze żadnych treningów.</Text>}
-          />
 
-          <TouchableOpacity style={styles.createButton} onPress={handleCreateNew}>
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <Text style={styles.closeButtonText}>✕</Text>
+          </TouchableOpacity>
+
+
+          <Text style={styles.title}>Treningi dla</Text>
+          <Text style={styles.clientName}>
+            {client.first_name} {client.last_name}
+          </Text>
+
+          {loading ? (
+            <Text>Ładowanie…</Text>
+          ) : error ? (
+            <Text style={{ color: "red" }}>{error}</Text>
+          ) : (
+            <FlatList<WorkoutItem>
+              data={workouts}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => (
+                <View style={styles.workoutTile}>
+                  <Text style={styles.workoutName}>{item.name}</Text>
+                  <Text style={styles.date}>{item.date}</Text>
+                </View>
+              )}
+              ListEmptyComponent={
+                <Text style={styles.emptyText}>
+                  Ten podopieczny nie ma jeszcze żadnych treningów.
+                </Text>
+              }
+            />
+          )}
+
+          <TouchableOpacity style={styles.createButton} onPress={onCreateWorkout}>
             <Text style={styles.createButtonText}>➕ Stwórz nowy trening</Text>
           </TouchableOpacity>
         </Pressable>
@@ -63,7 +78,33 @@ const ClientWorkoutsModal: React.FC<ClientWorkoutsModalProps> = ({ visible, onCl
   );
 };
 
+
+
 const styles = StyleSheet.create({
+
+  closeButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    paddingTop: 3,
+    paddingBottom: 3,
+    paddingLeft: 6,
+    paddingRight: 6,
+    borderRadius: 20,
+    backgroundColor: "#eee",
+  },
+
+  closeButtonText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+
+  date: {
+    marginTop: 4,
+    fontSize: 14,
+    color: "#777",
+  },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -86,6 +127,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
     textAlign: 'center',
+    marginBottom: 7,
   },
   clientName: {
     fontSize: 22,

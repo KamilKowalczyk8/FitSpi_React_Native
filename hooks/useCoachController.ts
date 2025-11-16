@@ -19,8 +19,17 @@ export function useCoachController() {
   const [isBrowseModalVisible, setBrowseModalVisible] = useState(false);
   // --- KONIEC NOWEGO STANU ---
 
+
+  // NOWY STAN – MODAL TWORZENIA TRENINGU
+  const [isCreateModalVisible, setCreateModalVisible] = useState(false);
+
+  const openCreateWorkoutModal = () => setCreateModalVisible(true);
+  const closeCreateWorkoutModal = () => setCreateModalVisible(false);
+
   const openModal = () => setIsModalVisible(true);
   const closeModal = () => setIsModalVisible(false);
+
+
 
   const fetchClients = useCallback(async () => {
     if (!token) return;
@@ -67,5 +76,9 @@ export function useCoachController() {
     isBrowseModalVisible,
     openBrowseModal,
     closeBrowseModal,
+
+    isCreateModalVisible,
+    openCreateWorkoutModal,
+    closeCreateWorkoutModal,
   };
 }

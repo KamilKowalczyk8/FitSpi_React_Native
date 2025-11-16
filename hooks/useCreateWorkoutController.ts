@@ -6,22 +6,23 @@ import { useState } from 'react';
 interface Props {
   client: ClientResponse;
   onClose: () => void;
+  onWorkoutCreated?: () => void;
 }
 
-export function useCreateWorkoutController({ client, onClose }: Props) {
+export function useCreateWorkoutController({ client, onClose, onWorkoutCreated }: Props) {
   const { token } = useAuth();
   const [description, setDescription] = useState('');
-  const [date, setDate] = useState(new Date()); 
+  const [date, setDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleCreate = async () => {
     if (!token || !client) return;
     if (!description) {
-      setError('Nazwa treningu jest wymagana.');
+      setError("Nazwa treningu jest wymagana.");
       return;
     }
-    
+
     setIsLoading(true);
     setError(null);
 
@@ -32,10 +33,12 @@ export function useCreateWorkoutController({ client, onClose }: Props) {
         description,
         date
       );
-      setIsLoading(false);
-      onClose(); // Zamknij modal po sukcesie
+
+      onWorkoutCreated?.();
+      onClose();
     } catch (e: any) {
-      setError(e.message);
+      setError("Wystąpił błąd podczas tworzenia treningu.");
+    } finally {
       setIsLoading(false);
     }
   };

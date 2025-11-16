@@ -10,3 +10,9 @@ export type Workout = {
   workout_type: WorkoutType;
   created_at: string;
 };
+
+export interface WorkoutItem {
+  id: number;
+  name: string;
+  date: string;
+}

@@ -2,6 +2,7 @@ import AddClientButton from '@/components/coach/AddClientButton';
 import AddClientModal from '@/components/coach/AddClientModal';
 import ClientList from '@/components/coach/ClientList';
 import ClientWorkoutsModal from '@/components/coach/ClientWorkoutsModal';
+import CreateWorkoutModal from '@/components/coach/CreateWorkoutModal.tsx';
 import { SettingsDrawer } from '@/components/SettingsDrawer';
 import { useCoachController } from '@/hooks/useCoachController';
 import { StyleSheet, Text, View } from 'react-native';
@@ -37,6 +38,10 @@ export default function CoachScreen() {
     isBrowseModalVisible,
     openBrowseModal,
     closeBrowseModal,
+
+    isCreateModalVisible,
+    openCreateWorkoutModal,
+    closeCreateWorkoutModal,
   } = useCoachController();
 
   return (
@@ -62,12 +67,21 @@ export default function CoachScreen() {
       />
 
       {selectedClient && (
-        <ClientWorkoutsModal
-          visible={isBrowseModalVisible}
-          onClose={closeBrowseModal}
-          client={selectedClient}
-        />
-      )}
+      <>
+      <ClientWorkoutsModal
+            visible={isBrowseModalVisible}
+            onClose={closeBrowseModal}
+            client={selectedClient}
+            onCreateWorkout={openCreateWorkoutModal} refreshAfterCreate={false}    />
+
+    <CreateWorkoutModal
+      visible={isCreateModalVisible}
+      onClose={closeCreateWorkoutModal}
+      client={selectedClient}
+    />
+  </>
+)}
+
     </View>
   );
 }

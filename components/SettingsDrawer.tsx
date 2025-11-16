@@ -73,7 +73,10 @@ export const SettingsDrawer: React.FC = () => {
             >
               <Text style={styles.optionText}>📬 Zaproszenia</Text>
             </TouchableOpacity>
-          
+
+          <TouchableOpacity style={styles.optionButton}>
+            <Text style={styles.optionText}>💪 Treningi od trenera</Text>
+          </TouchableOpacity>
 
           <TouchableOpacity style={styles.optionButton}>
             <Text style={styles.optionText}>⚙️ Ustawienia</Text>
@@ -114,7 +117,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     right: 0,
-    width: width * 0.7,
+    width: width * 0.58,
     height: "100%",
     backgroundColor: "#fff",
     padding: 20,

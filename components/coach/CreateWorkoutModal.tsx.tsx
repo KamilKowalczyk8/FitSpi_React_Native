@@ -1,3 +1,4 @@
+import { ClientResponse } from '@/controllers/coach/clientLink.controller';
 import { useCreateWorkoutController } from '@/hooks/useCreateWorkoutController';
 import React from 'react';
 import {
@@ -10,65 +11,58 @@ import {
   TouchableOpacity
 } from 'react-native';
 
-const CreateWorkoutModal: React.FC<ClientWorkoutsModalProps> = ({ visible, onClose, client }) => {
+interface Props {
+  visible: boolean;
+  onClose: () => void;
+  client: ClientResponse;
+  onWorkoutCreated?: () => void;
+}
+
+
+const CreateWorkoutModal: React.FC<Props> = ({
+  visible,
+  onClose,
+  client,
+  onWorkoutCreated
+}) => {
   const {
     description,
     setDescription,
     date,
-    setDate, 
+    setDate,
     isLoading,
     error,
     handleCreate,
-  } = useCreateWorkoutController({ client, onClose });
-
-  const handleDateChange = (text: string) => {
-    if (text.length <= 10) {
-      setDate(new Date(text)); 
-    }
-  };
-  const dateString = date.toLocaleDateString('sv-SE'); 
+  } = useCreateWorkoutController({ client, onClose, onWorkoutCreated });
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.overlay} onPress={onClose}>
         <Pressable style={styles.container}>
+
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <Text style={styles.closeButtonText}>✕</Text>
+          </TouchableOpacity>
+          
           <Text style={styles.title}>Nowy trening dla</Text>
           <Text style={styles.clientName}>{client.first_name} {client.last_name}</Text>
-          
+
           <Text style={styles.label}>Nazwa treningu</Text>
           <TextInput
             style={styles.input}
             value={description}
             onChangeText={setDescription}
-            placeholder="np. Trening Nóg"
+            placeholder="Podaj nazwe treningu"
           />
 
-          <Text style={styles.label}>Data (RRRR-MM-DD)</Text>
-          <TextInput
-            style={styles.input}
-            value={dateString}
-            onChangeText={handleDateChange}
-            placeholder="RRRR-MM-DD"
-            keyboardType="numeric"
-          />
-          
           {error && <Text style={styles.errorText}>{error}</Text>}
 
-          <TouchableOpacity 
-            style={[styles.createButton, isLoading && styles.disabledButton]} 
+          <TouchableOpacity
+            style={[styles.createButton, isLoading && styles.disabledButton]}
             onPress={handleCreate}
             disabled={isLoading}
           >
-            {isLoading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.createButtonText}>Stwórz</Text>
-            )}
+            {isLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.createButtonText}>Stwórz</Text>}
           </TouchableOpacity>
         </Pressable>
       </Pressable>
@@ -77,6 +71,22 @@ const CreateWorkoutModal: React.FC<ClientWorkoutsModalProps> = ({ visible, onClo
 };
 
 const styles = StyleSheet.create({
+  closeButton: {
+    position: "absolute",
+    top: 9,
+    right: 10,
+    paddingTop: 3,
+    paddingBottom: 3,
+    paddingLeft: 6,
+    paddingRight: 6,
+    borderRadius: 20,
+    backgroundColor: "#eee",
+  },
+  closeButtonText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -93,13 +103,14 @@ const styles = StyleSheet.create({
   title: { 
     fontSize: 16, 
     color: '#666', 
-    textAlign: 'center' 
+    textAlign: 'center', 
+    marginBottom: 7,
   },
   clientName: { 
     fontSize: 22, 
     fontWeight: 'bold', 
     textAlign: 'center', 
-    marginBottom: 20 
+    marginBottom: 20, 
   },
   label: { 
     fontSize: 16, 
