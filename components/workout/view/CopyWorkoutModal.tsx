@@ -1,35 +1,40 @@
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
 import {
-    Modal,
-    Platform,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Modal,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 interface CopyWorkoutModalProps {
   isVisible: boolean;
   onClose: () => void;
   onConfirm: (date: Date) => void;
+  title?: string;       
+  confirmText?: string; 
 }
 
 export const CopyWorkoutModal: React.FC<CopyWorkoutModalProps> = ({
   isVisible,
   onClose,
   onConfirm,
+  title = "Kopiuj trening na dzień:", 
+  confirmText = "Kopiuj",             
 }) => {
   const [date, setDate] = useState(new Date());
 
   const onChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     const currentDate = selectedDate || date;
+    if (Platform.OS === 'android') {
+    }
     setDate(currentDate);
   };
 
   const handleConfirm = () => {
     onConfirm(date);
-    // onClose(); // Zamykanie przeniesione do WorkoutScreen
   };
 
   return (
@@ -41,7 +46,7 @@ export const CopyWorkoutModal: React.FC<CopyWorkoutModalProps> = ({
     >
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
-          <Text style={styles.modalTitle}>Kopiuj trening na dzień:</Text>
+          <Text style={styles.modalTitle}>{title}</Text>
 
           <DateTimePicker
             testID="dateTimePicker"
@@ -65,7 +70,7 @@ export const CopyWorkoutModal: React.FC<CopyWorkoutModalProps> = ({
               style={[styles.buttonBase, styles.confirmButton]}
               onPress={handleConfirm}
             >
-              <Text style={styles.buttonText}>Kopiuj</Text>
+              <Text style={styles.buttonText}>{confirmText}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -73,7 +78,6 @@ export const CopyWorkoutModal: React.FC<CopyWorkoutModalProps> = ({
     </Modal>
   );
 };
-
 const styles = StyleSheet.create({
   centeredView: {
     flex: 1,

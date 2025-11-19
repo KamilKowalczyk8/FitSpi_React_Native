@@ -19,7 +19,9 @@ interface Props {
   client: ClientResponse;
   onCreateWorkout: () => void;
   refreshAfterCreate: boolean;
+  onWorkoutCreated?: () => void;
 }
+
 
 const ClientWorkoutsModal: React.FC<Props> = ({
   visible,
@@ -30,7 +32,7 @@ const ClientWorkoutsModal: React.FC<Props> = ({
 }) => {
 
   const { workouts, loading, error } =
-    useClientWorkoutsController(client, visible);
+    useClientWorkoutsController(client, visible, refreshAfterCreate);
 
   return (
     <Modal visible={visible} transparent animationType="fade">
@@ -57,7 +59,7 @@ const ClientWorkoutsModal: React.FC<Props> = ({
               keyExtractor={(item) => item.id.toString()}
               renderItem={({ item }) => (
                 <View style={styles.workoutTile}>
-                  <Text style={styles.workoutName}>{item.name}</Text>
+                  <Text style={styles.workoutName}>{item.description}</Text>
                   <Text style={styles.date}>{item.date}</Text>
                 </View>
               )}
@@ -125,7 +127,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    color: '#666',
+    color: '#faf8f8ff',
     textAlign: 'center',
     marginBottom: 7,
   },
@@ -144,6 +146,8 @@ const styles = StyleSheet.create({
   workoutName: {
     fontSize: 16,
     fontWeight: '500',
+    color: "#777",
+
   },
   emptyText: {
     textAlign: 'center',

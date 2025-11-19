@@ -13,6 +13,6 @@ export type Workout = {
 
 export interface WorkoutItem {
   id: number;
-  name: string;
+  description: string;
   date: string;
 }

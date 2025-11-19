@@ -37,7 +37,8 @@ export function useCreateWorkoutController({ client, onClose, onWorkoutCreated }
       onWorkoutCreated?.();
       onClose();
     } catch (e: any) {
-      setError("Wystąpił błąd podczas tworzenia treningu.");
+        console.error('Błąd przy tworzeniu treningu:', e);
+        setError(e.message || "Wystąpił błąd podczas tworzenia treningu.");
     } finally {
       setIsLoading(false);
     }

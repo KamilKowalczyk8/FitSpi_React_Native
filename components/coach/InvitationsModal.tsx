@@ -2,14 +2,12 @@ import InvitationTile from '@/components/coach/InvitationTile';
 import { useInvitationsController } from '@/hooks/useInvitationsController';
 import React from 'react';
 import {
-    ActivityIndicator,
-    FlatList,
-    Modal // Używamy standardowego Modalu z React Native
-    ,
-
-    Pressable,
-    StyleSheet,
-    Text
+  ActivityIndicator,
+  FlatList,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text
 } from 'react-native';
 
 interface InvitationsModalProps {
@@ -18,7 +16,6 @@ interface InvitationsModalProps {
 }
 
 const InvitationsModal: React.FC<InvitationsModalProps> = ({ visible, onClose }) => {
-  // Przekazujemy 'visible' do hooka, aby wiedział, kiedy pobrać dane
   const { invitations, isLoading, handleRespond } = useInvitationsController(visible);
 
   const renderContent = () => {
@@ -50,9 +47,7 @@ const InvitationsModal: React.FC<InvitationsModalProps> = ({ visible, onClose })
       animationType="fade"
       onRequestClose={onClose}
     >
-      {/* Tło (overlay), które można kliknąć, by zamknąć */}
       <Pressable style={styles.overlay} onPress={onClose}>
-        {/* Kontener (okienko), które blokuje kliknięcie "przez" */}
         <Pressable style={styles.container}> 
           <Text style={styles.heading}>Oczekujące zaproszenia</Text>
           {renderContent()}
@@ -62,7 +57,6 @@ const InvitationsModal: React.FC<InvitationsModalProps> = ({ visible, onClose })
   );
 };
 
-// Style skopiowane z poprzedniej wersji ekranu
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,

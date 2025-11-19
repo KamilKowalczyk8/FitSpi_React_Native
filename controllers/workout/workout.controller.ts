@@ -82,21 +82,22 @@ export const WorkoutController = {
   },
 
   getClientWorkouts: async (token: string, clientId: number) => {
-    const API_URL = process.env.EXPO_PUBLIC_API_URL;
-    if (!token) throw new Error("Brak tokena!");
+  const API_URL = process.env.EXPO_PUBLIC_API_URL;
+  if (!token) throw new Error("Brak tokena!");
 
-    const response = await fetch(`${API_URL}/workouts/user/${clientId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+  const response = await fetch(`${API_URL}/workouts/client/${clientId}/from-trainer`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
-    const result = await response.json();
-    if (!response.ok) {
-      throw new Error(result.message || "Nie udało się pobrać treningów klienta");
-    }
-    return result;
-  },
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Nie udało się pobrać treningów klienta");
+  }
+  return result;
+},
 
 
 deleteWorkout: async (token: string, workoutId: number) => {
@@ -138,6 +139,32 @@ deleteWorkout: async (token: string, workoutId: number) => {
         }
 
         return result;
+    },
+
+    getPendingWorkouts: async (token: string) => {
+      const API_URL = process.env.EXPO_PUBLIC_API_URL;
+      const response = await fetch(`${API_URL}/workouts?status=pending`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || "Błąd pobierania inboxa");
+      return result;
+    },
+
+    acceptWorkout: async (token: string, workoutId: number, date: Date) => {
+      const API_URL = process.env.EXPO_PUBLIC_API_URL;
+      const response = await fetch(`${API_URL}/workouts/${workoutId}/accept`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ date: date.toISOString() }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || "Błąd akceptacji");
+      return result;
     }
   
 };

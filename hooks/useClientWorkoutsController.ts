@@ -4,7 +4,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { WorkoutItem } from "@/models/Workout";
 import { useEffect, useState } from "react";
 
-export function useClientWorkoutsController(client: ClientResponse, visible: boolean) {
+export function useClientWorkoutsController(
+  client: ClientResponse,
+  visible: boolean,
+  refreshAfterCreate: boolean
+) {
   const { token } = useAuth();
 
   const [workouts, setWorkouts] = useState<WorkoutItem[]>([]);
@@ -28,6 +32,12 @@ export function useClientWorkoutsController(client: ClientResponse, visible: boo
   };
 
   useEffect(() => {
+    if (refreshAfterCreate && visible) {
+      loadClientWorkouts();
+    }
+  }, [refreshAfterCreate, visible]);
+
+  useEffect(() => {
     if (visible) {
       loadClientWorkouts();
     }
@@ -37,6 +47,7 @@ export function useClientWorkoutsController(client: ClientResponse, visible: boo
     workouts,
     loading,
     error,
-    refresh: loadClientWorkouts
+    refresh: loadClientWorkouts,
   };
 }
+

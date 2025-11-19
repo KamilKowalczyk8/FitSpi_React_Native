@@ -72,12 +72,15 @@ export default function CoachScreen() {
             visible={isBrowseModalVisible}
             onClose={closeBrowseModal}
             client={selectedClient}
-            onCreateWorkout={openCreateWorkoutModal} refreshAfterCreate={false}    />
+            onCreateWorkout={openCreateWorkoutModal} refreshAfterCreate={true}    />
 
     <CreateWorkoutModal
       visible={isCreateModalVisible}
       onClose={closeCreateWorkoutModal}
       client={selectedClient}
+      onWorkoutCreated={() => {
+        console.log("Workout created – refreshing client workouts");
+      }}
     />
   </>
 )}

@@ -15,6 +15,8 @@ import {
 
 import { useAuth } from "@/hooks/useAuth";
 import InvitationsModal from "./coach/InvitationsModal";
+import WorkoutInboxModal from "./coach/WorkoutInboxModal";
+
 
 const { width } = Dimensions.get("window");
 
@@ -22,6 +24,8 @@ export const SettingsDrawer: React.FC = () => {
   const [visible, setVisible] = useState(false);
   const [slideAnim] = useState(new Animated.Value(width));
   const [invitationsVisible, setInvitationsVisible] = useState(false);
+
+  const [inboxVisible, setInboxVisible] = useState(false);
 
   const router = useRouter();
   const { user } = useAuth();
@@ -54,6 +58,11 @@ export const SettingsDrawer: React.FC = () => {
     setTimeout(() => setInvitationsVisible(true), 300);
   };
 
+  const openInboxModal = () => {
+    toggleDrawer(); 
+    setTimeout(() => setInboxVisible(true), 300); 
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={toggleDrawer} style={styles.gearButton}>
@@ -74,17 +83,20 @@ export const SettingsDrawer: React.FC = () => {
               <Text style={styles.optionText}>📬 Zaproszenia</Text>
             </TouchableOpacity>
 
-          <TouchableOpacity style={styles.optionButton}>
-            <Text style={styles.optionText}>💪 Treningi od trenera</Text>
-          </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.optionButton}
+              onPress={openInboxModal}
+            >
+              <Text style={styles.optionText}>💪 Treningi od trenera</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.optionButton}>
-            <Text style={styles.optionText}>⚙️ Ustawienia</Text>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.optionButton}>
+              <Text style={styles.optionText}>⚙️ Ustawienia</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.optionButton} onPress={handleLogout}>
-            <Text style={styles.optionText}>🚪 Wyloguj się</Text>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.optionButton} onPress={handleLogout}>
+              <Text style={styles.optionText}>🚪 Wyloguj się</Text>
+            </TouchableOpacity>
         </Animated.View>
       </Modal>
 
@@ -92,6 +104,11 @@ export const SettingsDrawer: React.FC = () => {
         visible={invitationsVisible}
         onClose={() => setInvitationsVisible(false)}
       />
+      <WorkoutInboxModal 
+        visible={inboxVisible}
+        onClose={() => setInboxVisible(false)}
+      />
+
     </View>
   );
 };
