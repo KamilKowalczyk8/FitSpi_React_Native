@@ -153,13 +153,16 @@ deleteWorkout: async (token: string, workoutId: number) => {
 
     acceptWorkout: async (token: string, workoutId: number, date: Date) => {
       const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
+      const dateString = date.toLocaleDateString("sv-SE");
+
       const response = await fetch(`${API_URL}/workouts/${workoutId}/accept`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ date: date.toISOString() }),
+        body: JSON.stringify({ date: dateString }),
       });
 
       const result = await response.json();

@@ -1,5 +1,3 @@
-import { PendingWorkout, useWorkoutInbox } from '@/hooks/useWorkoutInbox';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import React from 'react';
 import {
     ActivityIndicator,
@@ -12,6 +10,9 @@ import {
     View
 } from 'react-native';
 
+import { CopyWorkoutModal } from '@/components/workout/view/CopyWorkoutModal';
+import { PendingWorkout, useWorkoutInbox } from '@/hooks/useWorkoutInbox';
+
 interface Props {
   visible: boolean;
   onClose: () => void;
@@ -21,73 +22,73 @@ const WorkoutInboxModal: React.FC<Props> = ({ visible, onClose }) => {
   const {
     workouts,
     loading,
-    actionLoading,
-    date,
-    showDatePicker,
-    initiateAccept,
-    onDateChange,
+    actionLoading,     // ID treningu, który się mieli (spinner na przycisku)
+    
+    isModalVisible,    // Czy modal z kalendarzem jest otwarty
+    openAcceptModal,   // Funkcja otwierająca modal dla konkretnego ID
+    closeAcceptModal,  // Funkcja zamykająca modal
+    handleConfirmAccept // Funkcja wysyłająca do API (przyjmuje Date)
   } = useWorkoutInbox(visible);
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable style={styles.overlay} onPress={onClose}>
-        <Pressable style={styles.container} onPress={() => {}}>
-          
-          <View style={styles.header}>
-            <Text style={styles.title}>📬 Oczekujące treningi</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Text style={styles.closeText}>✕</Text>
-            </TouchableOpacity>
-          </View>
+    <>
+      <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+        <Pressable style={styles.overlay} onPress={onClose}>
+          <Pressable style={styles.container} onPress={() => {}}>
+            
+            <View style={styles.header}>
+              <Text style={styles.title}>📬 Oczekujące treningi</Text>
+              <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+                <Text style={styles.closeText}>✕</Text>
+              </TouchableOpacity>
+            </View>
 
-          {loading ? (
-            <ActivityIndicator size="large" color="#34C759" style={{ marginTop: 20 }} />
-          ) : (
-            <FlatList<PendingWorkout>
-              data={workouts}
-              keyExtractor={(item) => item.id.toString()}
-              ListEmptyComponent={
-                <Text style={styles.emptyText}>Brak nowych treningów od trenera.</Text>
-              }
-              renderItem={({ item }) => (
-                <View style={styles.row}>
-                  <View style={styles.info}>
-                    <Text style={styles.workoutName}>{item.description}</Text>
-                    <Text style={styles.subText}>
-                      Otrzymano: {new Date(item.created_at).toLocaleDateString()}
-                    </Text>
+            {loading ? (
+              <ActivityIndicator size="large" color="#34C759" style={{ marginTop: 20 }} />
+            ) : (
+              <FlatList<PendingWorkout>
+                data={workouts}
+                keyExtractor={(item) => item.id.toString()}
+                ListEmptyComponent={
+                  <Text style={styles.emptyText}>Brak nowych treningów od trenera.</Text>
+                }
+                renderItem={({ item }) => (
+                  <View style={styles.row}>
+                    <View style={styles.info}>
+                      <Text style={styles.workoutName}>{item.description}</Text>
+                      <Text style={styles.subText}>
+                        Utworzono: {new Date(item.created_at).toLocaleDateString()}
+                      </Text>
+                    </View>
+
+                    <TouchableOpacity
+                      style={styles.acceptBtn}
+                      onPress={() => openAcceptModal(item.id)}
+                      disabled={actionLoading === item.id}
+                    >
+                      {actionLoading === item.id ? (
+                        <ActivityIndicator color="#fff" size="small" />
+                      ) : (
+                        <Text style={styles.acceptText}>Akceptuj</Text>
+                      )}
+                    </TouchableOpacity>
                   </View>
-
-                  <TouchableOpacity
-                    style={styles.acceptBtn}
-                    onPress={() => initiateAccept(item.id)}
-                    disabled={actionLoading === item.id}
-                  >
-                    {actionLoading === item.id ? (
-                      <ActivityIndicator color="#fff" size="small" />
-                    ) : (
-                      <Text style={styles.acceptText}>Akceptuj</Text>
-                    )}
-                  </TouchableOpacity>
-                </View>
-              )}
-            />
-          )}
-
-          {showDatePicker && (
-            <DateTimePicker
-              testID="dateTimePicker"
-              value={date}
-              mode="date"
-              display="default"
-              onChange={onDateChange}
-              minimumDate={new Date()}
-            />
-          )}
-
+                )}
+              />
+            )}
+          </Pressable>
         </Pressable>
-      </Pressable>
-    </Modal>
+      </Modal>
+
+      <CopyWorkoutModal
+        isVisible={isModalVisible}
+        onClose={closeAcceptModal}
+        onConfirm={handleConfirmAccept} 
+        
+        title="Zaplanuj ten trening na:"
+        confirmText="Zatwierdź"
+      />
+    </>
   );
 };
 

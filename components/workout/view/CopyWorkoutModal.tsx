@@ -78,62 +78,61 @@ export const CopyWorkoutModal: React.FC<CopyWorkoutModalProps> = ({
     </Modal>
   );
 };
-const styles = StyleSheet.create({
-  centeredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 25,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-    width: "90%",
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 15,
-    textAlign: "center",
-  },
-  datePicker: {
-    width: "100%",
-    height: Platform.OS === "ios" ? 300 : "auto",
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    width: "100%",
-    marginTop: 20,
-  },
-  buttonBase: {
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    elevation: 2,
-    minWidth: 120,
-    alignItems: "center",
-  },
-  cancelButton: {
-    backgroundColor: "#f44336",
-  },
-  confirmButton: {
-    backgroundColor: "#4CAF50",
-  },
-  buttonText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 16,
-    textAlign: "center",
-  },
-});
 
-export default CopyWorkoutModal;
+const styles = StyleSheet.create({
+    centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
+    modalView: {
+        margin: 20,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 25,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+        width: "90%",
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: "bold",
+        marginBottom: 15,
+        textAlign: "center",
+    },
+    datePicker: {
+        width: "100%",
+        height: Platform.OS === "ios" ? 300 : undefined,
+    },
+    buttonContainer: {
+        flexDirection: "row",
+        justifyContent: "space-around",
+        width: "100%",
+        marginTop: 20,
+    },
+    buttonBase: {
+        borderRadius: 12,
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        elevation: 2,
+        minWidth: 120,
+        alignItems: "center",
+    },
+    cancelButton: {
+        backgroundColor: "#f44336",
+    },
+    confirmButton: {
+        backgroundColor: "#4CAF50", 
+    },
+    buttonText: {
+        color: "white",
+        fontWeight: "bold",
+        fontSize: 16,
+        textAlign: "center",
+    },
+});

@@ -1,8 +1,7 @@
 import { WorkoutController } from '@/controllers/workout/workout.controller';
 import { useAuth } from '@/hooks/useAuth';
-import { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useEffect, useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, DeviceEventEmitter } from 'react-native';
 
 export interface PendingWorkout {
   id: number;
@@ -18,9 +17,8 @@ export function useWorkoutInbox(visible: boolean) {
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
 
+  const [isModalVisible, setModalVisible] = useState(false);
   const [selectedWorkoutId, setSelectedWorkoutId] = useState<number | null>(null);
-  const [date, setDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
     if (visible && token) {
@@ -41,35 +39,37 @@ export function useWorkoutInbox(visible: boolean) {
     }
   };
 
-  const confirmAcceptance = async (id: number, targetDate: Date) => {
-    if (!token) return;
-    setActionLoading(id);
+  const openAcceptModal = (id: number) => {
+    setSelectedWorkoutId(id);
+    setModalVisible(true);
+  };
+
+  const closeAcceptModal = () => {
+    setModalVisible(false);
+    setSelectedWorkoutId(null);
+  };
+
+  
+
+  const handleConfirmAccept = async (date: Date) => {
+    if (!token || !selectedWorkoutId) return;
+    
+    setActionLoading(selectedWorkoutId);
+
     try {
-      await WorkoutController.acceptWorkout(token, id, targetDate);
-      setWorkouts((prev) => prev.filter((w) => w.id !== id));
-      Alert.alert('Sukces', 'Trening dodany do kalendarza!');
+      await WorkoutController.acceptWorkout(token, selectedWorkoutId, date);
+      
+      setWorkouts((prev) => prev.filter((w) => w.id !== selectedWorkoutId));
+      
+      DeviceEventEmitter.emit('event.refreshWorkouts'); 
+
+      Alert.alert('Sukces', 'Trening został dodany do Twojego kalendarza!');
+      
+      closeAcceptModal();
     } catch (e: any) {
       Alert.alert('Błąd', e.message || 'Nie udało się zaakceptować treningu');
     } finally {
       setActionLoading(null);
-      setSelectedWorkoutId(null);
-    }
-  };
-
-  const initiateAccept = (id: number) => {
-    setSelectedWorkoutId(id);
-    setDate(new Date());
-    setShowDatePicker(true);
-  };
-
-  const onDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
-    setShowDatePicker(false);
-
-    if (event.type === 'set' && selectedDate && selectedWorkoutId) {
-      setDate(selectedDate);
-      confirmAcceptance(selectedWorkoutId, selectedDate);
-    } else {
-      setSelectedWorkoutId(null);
     }
   };
 
@@ -77,9 +77,10 @@ export function useWorkoutInbox(visible: boolean) {
     workouts,
     loading,
     actionLoading,
-    date,
-    showDatePicker,
-    initiateAccept,
-    onDateChange,
+    
+    isModalVisible,
+    openAcceptModal,
+    closeAcceptModal,
+    handleConfirmAccept
   };
 }

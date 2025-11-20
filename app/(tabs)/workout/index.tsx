@@ -1,7 +1,7 @@
 import { SettingsDrawer } from "@/components/SettingsDrawer";
 import { DateSlider } from "@/components/workout/DateSlider";
 import ExerciseList from "@/components/workout/ExerciseList";
-import CopyWorkoutModal from "@/components/workout/view/CopyWorkoutModal";
+import { CopyWorkoutModal } from "@/components/workout/view/CopyWorkoutModal";
 import { ExerciseAdd } from "@/components/workout/view/ExcerciseAdd.view";
 import WorkoutAdd from "@/components/workout/view/WorkoutAdd.view";
 import WorkoutOptions from "@/components/workout/WorkoutOptions";
@@ -14,7 +14,7 @@ import { Workout } from "@/models/Workout";
 import { ExerciseResponse } from "@/types/exercise.types";
 import { isSameDay } from "date-fns";
 import { useEffect, useState } from "react";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, DeviceEventEmitter, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const WorkoutScreen = () => {
   const { user, token } = useAuth();
@@ -32,18 +32,27 @@ const WorkoutScreen = () => {
   const [exercises, setExercises] = useState<ExerciseResponse[]>([]);
   const [editingExercise, setEditingExercise] = useState<ExerciseResponse | null>(null);
 
+  const fetchWorkouts = async () => {
+    if (!token) return;
+    try {
+      const data = await WorkoutController.getWorkouts(token);
+      setWorkouts(data);
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Błąd", "Nie udało się pobrać treningów");
+    }
+  };
   useEffect(() => {
-    const fetchWorkouts = async () => {
-      if (!token) return;
-      try {
-        const data = await WorkoutController.getWorkouts(token);
-        setWorkouts(data);
-      } catch (error) {
-        console.error(error);
-        Alert.alert("Błąd", "Nie udało się pobrać treningów");
-      }
-    };
     fetchWorkouts();
+
+    const subscription = DeviceEventEmitter.addListener('event.refreshWorkouts', () => {
+      console.log("♻️ Odebrano sygnał odświeżenia - pobieram treningi...");
+      fetchWorkouts();
+    });
+
+    return () => {
+      subscription.remove();
+    };
   }, [token]);
 
   useEffect(() => {
@@ -66,7 +75,6 @@ const WorkoutScreen = () => {
     fetchExercises();
   }, [token, selectedWorkout]);
 
-  // Wybieranie treningu dla wybranej daty
   useEffect(() => {
     const workout = workouts.find((w) =>
       isSameDay(new Date(w.date), new Date(selectedDate))
@@ -74,7 +82,6 @@ const WorkoutScreen = () => {
     setSelectedWorkout(workout || null);
   }, [selectedDate, workouts]);
 
-  // Zapisywanie / edycja ćwiczenia
   const handleSaveExercise = async (exerciseData: any) => {
     if (!token || !selectedWorkout) {
       Alert.alert("Błąd", "Brak wybranego treningu.");
