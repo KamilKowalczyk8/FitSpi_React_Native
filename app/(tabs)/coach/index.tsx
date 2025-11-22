@@ -69,10 +69,10 @@ export default function CoachScreen() {
       {selectedClient && (
       <>
       <ClientWorkoutsModal
-            visible={isBrowseModalVisible}
-            onClose={closeBrowseModal}
-            client={selectedClient}
-            onCreateWorkout={openCreateWorkoutModal} refreshAfterCreate={true}    />
+        visible={isBrowseModalVisible}
+        onClose={closeBrowseModal}
+        client={selectedClient}    
+      />
 
     <CreateWorkoutModal
       visible={isCreateModalVisible}

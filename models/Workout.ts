@@ -9,6 +9,7 @@ export type Workout = {
   description?: string;
   workout_type: WorkoutType;
   created_at: string;
+  status?: 'pending' | 'accepted' | 'rejected'; 
 };
 
 export interface WorkoutItem {

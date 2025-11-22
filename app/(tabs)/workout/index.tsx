@@ -35,8 +35,11 @@ const WorkoutScreen = () => {
   const fetchWorkouts = async () => {
     if (!token) return;
     try {
-      const data = await WorkoutController.getWorkouts(token);
-      setWorkouts(data);
+      const data = await WorkoutController.getWorkouts(token) as Workout[];
+      
+      const acceptedWorkouts = data.filter((w) => w.status === 'accepted');
+      setWorkouts(acceptedWorkouts);
+      
     } catch (error) {
       console.error(error);
       Alert.alert("Błąd", "Nie udało się pobrać treningów");
@@ -114,9 +117,6 @@ const WorkoutScreen = () => {
           weight: exerciseData.weight,
           weightUnits: exerciseData.weightUnits,
           workoutId: selectedWorkout.id,
-          day: new Date(selectedWorkout.date)
-            .toLocaleDateString("en-US", { weekday: "long" })
-            .toLowerCase(),
         };
         const savedExercise = await ExerciseController.addExercise(token, body);
         setExercises((prev) => [...prev, savedExercise]);

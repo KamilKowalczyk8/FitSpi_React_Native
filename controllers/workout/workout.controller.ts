@@ -168,6 +168,26 @@ deleteWorkout: async (token: string, workoutId: number) => {
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || "Błąd akceptacji");
       return result;
+    },
+
+    rejectWorkout: async (token: string, workoutId: number) => {
+    const API_URL = process.env.EXPO_PUBLIC_API_URL;
+    
+    if (!token) throw new Error("Brak tokena!");
+
+    const response = await fetch(`${API_URL}/workouts/${workoutId}/reject`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+        throw new Error(result.message || "Nie udało się odrzucić treningu");
     }
+    return result;
+  }
   
 };

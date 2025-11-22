@@ -1,6 +1,9 @@
+import { CopyWorkoutModal } from '@/components/workout/view/CopyWorkoutModal';
+import { PendingWorkout, useWorkoutInbox } from '@/hooks/useWorkoutInbox';
 import React from 'react';
 import {
     ActivityIndicator,
+    Alert,
     FlatList,
     Modal,
     Pressable,
@@ -9,9 +12,6 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-
-import { CopyWorkoutModal } from '@/components/workout/view/CopyWorkoutModal';
-import { PendingWorkout, useWorkoutInbox } from '@/hooks/useWorkoutInbox';
 
 interface Props {
   visible: boolean;
@@ -22,13 +22,24 @@ const WorkoutInboxModal: React.FC<Props> = ({ visible, onClose }) => {
   const {
     workouts,
     loading,
-    actionLoading,     // ID treningu, który się mieli (spinner na przycisku)
-    
-    isModalVisible,    // Czy modal z kalendarzem jest otwarty
-    openAcceptModal,   // Funkcja otwierająca modal dla konkretnego ID
-    closeAcceptModal,  // Funkcja zamykająca modal
-    handleConfirmAccept // Funkcja wysyłająca do API (przyjmuje Date)
+    actionLoading,
+    isModalVisible,
+    openAcceptModal,
+    closeAcceptModal,
+    handleConfirmAccept,
+    handleReject, 
   } = useWorkoutInbox(visible);
+
+  const confirmReject = (id: number) => {
+    Alert.alert(
+      "Odrzuć trening",
+      "Czy na pewno chcesz odrzucić tę propozycję?",
+      [
+        { text: "Anuluj", style: "cancel" },
+        { text: "Odrzuć", style: "destructive", onPress: () => handleReject(id) }
+      ]
+    );
+  };
 
   return (
     <>
@@ -61,17 +72,29 @@ const WorkoutInboxModal: React.FC<Props> = ({ visible, onClose }) => {
                       </Text>
                     </View>
 
-                    <TouchableOpacity
-                      style={styles.acceptBtn}
-                      onPress={() => openAcceptModal(item.id)}
-                      disabled={actionLoading === item.id}
-                    >
-                      {actionLoading === item.id ? (
-                        <ActivityIndicator color="#fff" size="small" />
-                      ) : (
-                        <Text style={styles.acceptText}>Akceptuj</Text>
-                      )}
-                    </TouchableOpacity>
+                    <View style={styles.actions}>
+                        {/* Przycisk AKCEPTUJ */}
+                        <TouchableOpacity
+                          style={styles.acceptBtn}
+                          onPress={() => openAcceptModal(item.id)}
+                          disabled={actionLoading === item.id}
+                        >
+                          {actionLoading === item.id ? (
+                            <ActivityIndicator color="#fff" size="small" />
+                          ) : (
+                            <Text style={styles.acceptText}>Akceptuj</Text>
+                          )}
+                        </TouchableOpacity>
+
+                         {/* Przycisk ODRZUĆ */}
+                        <TouchableOpacity
+                          style={styles.rejectBtn}
+                          onPress={() => confirmReject(item.id)}
+                          disabled={actionLoading === item.id}
+                        >
+                          <Text style={styles.rejectText}>✕</Text>
+                        </TouchableOpacity>
+                    </View>
                   </View>
                 )}
               />
@@ -84,7 +107,6 @@ const WorkoutInboxModal: React.FC<Props> = ({ visible, onClose }) => {
         isVisible={isModalVisible}
         onClose={closeAcceptModal}
         onConfirm={handleConfirmAccept} 
-        
         title="Zaplanuj ten trening na:"
         confirmText="Zatwierdź"
       />
@@ -131,14 +153,34 @@ const styles = StyleSheet.create({
   info: { flex: 1 },
   workoutName: { fontSize: 16, fontWeight: '600', marginBottom: 4 },
   subText: { fontSize: 12, color: '#888' },
+  
+  actions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+  },
   acceptBtn: {
     backgroundColor: '#34C759',
     paddingVertical: 8,
     paddingHorizontal: 15,
     borderRadius: 8,
-    marginLeft: 10,
   },
   acceptText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
+  
+
+  rejectBtn: {
+      backgroundColor: '#ffebee', 
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: '#ffcdd2'
+  },
+  rejectText: {
+      color: '#d32f2f', 
+      fontWeight: 'bold',
+      fontSize: 14
+  }
 });
 
 export default WorkoutInboxModal;

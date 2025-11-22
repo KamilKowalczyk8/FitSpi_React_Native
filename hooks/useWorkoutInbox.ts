@@ -49,6 +49,23 @@ export function useWorkoutInbox(visible: boolean) {
     setSelectedWorkoutId(null);
   };
 
+
+  const handleReject = async (id: number) => {
+    if (!token) return;
+    setActionLoading(id);
+    try {
+      await WorkoutController.rejectWorkout(token, id);
+      
+      // Usuwamy z listy (w: PendingWorkout)
+      setWorkouts((prev) => prev.filter((w: PendingWorkout) => w.id !== id));
+      
+      Alert.alert("Info", "Trening został odrzucony.");
+    } catch (e: any) {
+      Alert.alert("Błąd", "Nie udało się odrzucić treningu.");
+    } finally {
+      setActionLoading(null);
+    }
+  };
   
 
   const handleConfirmAccept = async (date: Date) => {
@@ -81,6 +98,8 @@ export function useWorkoutInbox(visible: boolean) {
     isModalVisible,
     openAcceptModal,
     closeAcceptModal,
-    handleConfirmAccept
+    handleConfirmAccept,
+
+    handleReject, 
   };
 }
