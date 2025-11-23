@@ -41,7 +41,6 @@ const EditWorkoutTitleModal: React.FC<Props> = ({ visible, onClose, initialTitle
       animationType="fade" 
       onRequestClose={onClose}
     >
-      {/* KeyboardAvoidingView sprawia, że dymek "ucieka" przed klawiaturą */}
       <KeyboardAvoidingView 
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.overlay}
@@ -55,7 +54,7 @@ const EditWorkoutTitleModal: React.FC<Props> = ({ visible, onClose, initialTitle
             onChangeText={setTitle}
             placeholder="Wpisz nową nazwę..."
             autoFocus
-            selectTextOnFocus // Zaznacza tekst po otwarciu, łatwiej edytować
+            selectTextOnFocus 
           />
 
           <View style={styles.buttonsContainer}>
@@ -80,7 +79,7 @@ const EditWorkoutTitleModal: React.FC<Props> = ({ visible, onClose, initialTitle
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)', // Nieco ciemniejsze tło dla lepszego kontrastu
+    backgroundColor: 'rgba(0,0,0,0.4)', 
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
@@ -88,10 +87,8 @@ const styles = StyleSheet.create({
   bubbleContainer: {
     width: '100%',
     backgroundColor: '#fff',
-    borderRadius: 20, // Duże zaokrąglenie = efekt dymka
+    borderRadius: 20,
     padding: 25,
-    
-    // Cień (Shadow) dla efektu "pływania"
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -109,7 +106,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   input: {
-    backgroundColor: '#f2f2f2', // Lekkie tło dla inputa
+    backgroundColor: '#f2f2f2', 
     borderRadius: 12,
     paddingHorizontal: 15,
     paddingVertical: 12,

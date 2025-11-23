@@ -27,7 +27,6 @@ const ClientList: React.FC<ClientListProps> = ({ clients, isLoading, error, onBr
   return (
     <FlatList
       data={clients}
-      // Przekazujemy 'item' (ClientResponse) i handler do kafelka
       renderItem={({ item }) => (
         <ClientTile 
           client={item} 

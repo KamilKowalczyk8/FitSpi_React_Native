@@ -1,69 +1,100 @@
+import { WorkoutStatus } from '@/models/Workout';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+    GestureResponderEvent,
+    Modal,
+    Pressable,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
+} from 'react-native';
 
 interface Props {
+  status: WorkoutStatus;
   onEditTitle: () => void;
   onViewDetails: () => void;
   onDelete: () => void;
+  onSend: () => void;
 }
 
-const ClientWorkoutOptions: React.FC<Props> = ({ onEditTitle, onViewDetails, onDelete }) => {
-  const [isOpen, setIsOpen] = useState(false);
+const ClientWorkoutOptions: React.FC<Props> = ({
+  status,
+  onEditTitle,
+  onViewDetails,
+  onDelete,
+  onSend
+}) => {
+  const [visible, setVisible] = useState(false);
+  const [menuTop, setMenuTop] = useState(0);
 
-  const toggleMenu = () => setIsOpen(!isOpen);
+
+  const openMenu = (event: GestureResponderEvent) => {
+    const touchY = event.nativeEvent.pageY; 
+    setMenuTop(touchY);
+    setVisible(true);
+  };
+
+  const closeMenu = () => setVisible(false);
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity onPress={toggleMenu} style={styles.iconButton}>
+    <View>
+      <TouchableOpacity onPress={openMenu} style={styles.iconButton}>
         <Ionicons name="ellipsis-vertical" size={24} color="#666" />
       </TouchableOpacity>
 
-      {isOpen && (
-        <View style={styles.dropdown}>
-          <TouchableOpacity 
-            style={styles.option} 
-            onPress={() => { setIsOpen(false); onEditTitle(); }}
-          >
-            <Text style={styles.optionText}>✏️ Zmień nazwę</Text>
-          </TouchableOpacity>
+      <Modal
+        visible={visible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={closeMenu} 
+      >
 
-          <TouchableOpacity 
-            style={styles.option} 
-            onPress={() => { setIsOpen(false); onViewDetails(); }}
-          >
-            <Text style={styles.optionText}>👁️ Zobacz ćwiczenia</Text>
-          </TouchableOpacity>
+        <Pressable style={styles.overlay} onPress={closeMenu}>
+          
+          <View style={[styles.dropdown, { top: menuTop }]}>
+            
+            {(status === WorkoutStatus.DRAFT || status === WorkoutStatus.REJECTED || status === WorkoutStatus.DOWNLOADED) && (
+              <TouchableOpacity style={styles.option} onPress={() => { closeMenu(); onSend(); }}>
+                <Text style={styles.optionText}>📤 Wyślij trening</Text>
+              </TouchableOpacity>
+            )}
 
-          <TouchableOpacity 
-            style={[styles.option, { borderBottomWidth: 0 }]} 
-            onPress={() => { setIsOpen(false); onDelete(); }}
-          >
-            <Text style={[styles.optionText, { color: 'red' }]}>🗑️ Usuń</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+            <TouchableOpacity style={styles.option} onPress={() => { closeMenu(); onEditTitle(); }}>
+              <Text style={styles.optionText}>✏️ Zmień nazwę</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.option} onPress={() => { closeMenu(); onViewDetails(); }}>
+              <Text style={styles.optionText}>👁️ Zobacz ćwiczenia</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={[styles.option, { borderBottomWidth: 0 }]} onPress={() => { closeMenu(); onDelete(); }}>
+              <Text style={[styles.optionText, { color: 'red' }]}>🗑️ Usuń</Text>
+            </TouchableOpacity>
+
+          </View>
+        </Pressable>
+      </Modal>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-
-    zIndex: 100, 
-    position: 'relative',
-  },
   iconButton: {
     padding: 5,
   },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'transparent', 
+  },
   dropdown: {
     position: 'absolute',
-    right: 30, 
-    top: 0,
+    right: 40,
+    width: 170,
     backgroundColor: 'white',
     borderRadius: 8,
     padding: 5,
-    width: 160,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
@@ -71,7 +102,6 @@ const styles = StyleSheet.create({
     elevation: 5,
     borderWidth: 1,
     borderColor: '#eee',
-    zIndex: 200, 
   },
   option: {
     paddingVertical: 10,

@@ -141,6 +141,22 @@ deleteWorkout: async (token: string, workoutId: number) => {
         return result;
     },
 
+    sendWorkout: async (token: string, workoutId: number) => {
+      const API_URL = process.env.EXPO_PUBLIC_API_URL;
+      const response = await fetch(`${API_URL}/workouts/${workoutId}/send`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.message || "Nie udało się wysłać treningu");
+      }
+      return result;
+    },
+
     getPendingWorkouts: async (token: string) => {
       const API_URL = process.env.EXPO_PUBLIC_API_URL;
       const response = await fetch(`${API_URL}/workouts?status=pending`, {

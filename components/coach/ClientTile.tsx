@@ -1,11 +1,11 @@
 import { ClientResponse } from '@/controllers/coach/clientLink.controller';
 import React, { useState } from "react";
 import {
-    GestureResponderEvent,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  GestureResponderEvent,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import ClientOptions from "./ClientOptions";
 
@@ -17,7 +17,6 @@ interface ClientTileProps {
 const ClientTile: React.FC<ClientTileProps> = ({ client, onBrowseWorkouts }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  /** Kliknięcie w kafelek klienta */
   const handleTilePress = () => {
     if (isMenuOpen) {
       setIsMenuOpen(false);
@@ -26,7 +25,6 @@ const ClientTile: React.FC<ClientTileProps> = ({ client, onBrowseWorkouts }) => 
     console.log(`Nawigacja do klienta: ${client.first_name}`);
   };
 
-  /** Kliknięcie w przycisk menu (trzy kropki) */
   const handleToggleMenu = (event: GestureResponderEvent) => {
     event.stopPropagation();
     setIsMenuOpen((prev) => !prev);
@@ -38,7 +36,6 @@ const ClientTile: React.FC<ClientTileProps> = ({ client, onBrowseWorkouts }) => 
       onPress={handleTilePress}
       activeOpacity={0.7}
     >
-      {/* Avatar placeholder */}
       <View style={styles.avatar} />
 
       {/* Dane klienta */}

@@ -1,8 +1,9 @@
+import { getWorkoutStatusColor, getWorkoutStatusLabel } from '@/app/utils/workoutStatusHelper';
 import { ClientResponse } from '@/controllers/coach/clientLink.controller';
 import { WorkoutController } from "@/controllers/workout/workout.controller";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientWorkoutsController } from "@/hooks/useClientWorkoutsController";
-import { WorkoutItem } from "@/models/Workout";
+import { WorkoutItem, WorkoutStatus } from "@/models/Workout";
 import React, { useState } from 'react';
 import {
   Alert,
@@ -14,11 +15,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import CreateWorkoutModal from './CreateWorkoutModal.tsx';
 import ClientWorkoutDetailsModal from './exercisesClient/ClientWorkoutDetailsModal';
 import ClientWorkoutOptions from './exercisesClient/ClientWorkoutOptions';
 import EditWorkoutTitleModal from './exercisesClient/EditWorkoutTitleModal';
-
-import CreateWorkoutModal from './CreateWorkoutModal.tsx';
 
 interface Props {
   visible: boolean;
@@ -32,13 +32,15 @@ const ClientWorkoutsModal: React.FC<Props> = ({
   client,
 }) => {
   const { token } = useAuth();
-  
   const { workouts, loading, error, refresh } = useClientWorkoutsController(client, visible, false);
+  
+  
   const [selectedWorkout, setSelectedWorkout] = useState<WorkoutItem | null>(null);
   const [isDetailsVisible, setDetailsVisible] = useState(false);
   const [isEditTitleVisible, setEditTitleVisible] = useState(false);
   const [isCreateVisible, setCreateVisible] = useState(false); 
 
+  const filteredWorkouts = workouts.filter(w => w.status !== WorkoutStatus.ACCEPTED);
 
   const handleDelete = async (workoutId: number) => {
     if (!token) return;
@@ -55,6 +57,8 @@ const ClientWorkoutsModal: React.FC<Props> = ({
     if (!token || !selectedWorkout) return;
     try {
       await WorkoutController.updateWorkoutDescription(token, selectedWorkout.id, newTitle);
+      setEditTitleVisible(false);
+      
       Alert.alert("Sukces", "Nazwa zmieniona.");
       refresh();
     } catch (e: any) {
@@ -62,10 +66,21 @@ const ClientWorkoutsModal: React.FC<Props> = ({
     }
   };
 
+  const handleSendWorkout = async (workoutId: number) => {
+    if (!token) return;
+    try {
+      await WorkoutController.sendWorkout(token, workoutId);
+      Alert.alert("Sukces", "Trening został wysłany do podopiecznego.");
+      refresh();
+    } catch (e: any) {
+      Alert.alert("Błąd", e.message || "Nie udało się wysłać treningu.");
+    }
+  };
+
   const handleWorkoutCreated = () => {
     refresh(); 
     setCreateVisible(false);
-    Alert.alert("Sukces", "Trening został utworzony i wysłany do podopiecznego.");
+    Alert.alert("Sukces", "Szkic treningu został utworzony. Możesz go teraz edytować i wysłać.");
   };
 
   const openDetails = (workout: WorkoutItem) => {
@@ -80,7 +95,6 @@ const ClientWorkoutsModal: React.FC<Props> = ({
 
   return (
     <>
-      {/* GŁÓWNY MODAL Z LISTĄ TRENINGÓW */}
       <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
         <Pressable style={styles.overlay} onPress={onClose}>
           <Pressable style={styles.container}>
@@ -100,7 +114,7 @@ const ClientWorkoutsModal: React.FC<Props> = ({
               <Text style={{ color: "red", textAlign: 'center', marginTop: 20 }}>{error}</Text>
             ) : (
               <FlatList<WorkoutItem>
-                data={workouts}
+                data={filteredWorkouts}
                 keyExtractor={(item) => item.id.toString()}
                 contentContainerStyle={{ paddingBottom: 20 }}
                 
@@ -117,9 +131,15 @@ const ClientWorkoutsModal: React.FC<Props> = ({
                     >
                       <Text style={styles.workoutName}>{item.description}</Text>
                       <Text style={styles.date}>{item.date}</Text>
+                      
+                      <Text style={[styles.statusText, { color: getWorkoutStatusColor(item.status) }]}>
+                        {getWorkoutStatusLabel(item.status)}
+                      </Text>
                     </TouchableOpacity>
 
                     <ClientWorkoutOptions 
+                      status={item.status}
+                      onSend={() => handleSendWorkout(item.id)}
                       onEditTitle={() => openEditTitle(item)}
                       onViewDetails={() => openDetails(item)}
                       onDelete={() => handleDelete(item.id)}
@@ -134,7 +154,6 @@ const ClientWorkoutsModal: React.FC<Props> = ({
               />
             )}
 
-            {/* Przycisk otwierający modal tworzenia */}
             <TouchableOpacity 
               style={styles.createButton} 
               onPress={() => setCreateVisible(true)}
@@ -230,7 +249,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderWidth: 1,
     borderColor: '#eee',
-    minHeight: 70, 
+    minHeight: 75, 
   },
   workoutName: { 
     fontSize: 16, 
@@ -240,7 +259,13 @@ const styles = StyleSheet.create({
   },
   date: { 
     fontSize: 13, 
-    color: "#777" 
+    color: "#777",
+    marginBottom: 2
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginTop: 2,
   },
   emptyText: { 
     textAlign: 'center', 

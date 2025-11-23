@@ -1,6 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import * as SecureStore from "expo-secure-store";
 import React, { useState } from "react";
 import {
   Animated,
@@ -28,7 +27,7 @@ export const SettingsDrawer: React.FC = () => {
   const [inboxVisible, setInboxVisible] = useState(false);
 
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const toggleDrawer = () => {
     if (visible) {
@@ -48,9 +47,9 @@ export const SettingsDrawer: React.FC = () => {
   };
 
   const handleLogout = async () => {
-    await SecureStore.deleteItemAsync("accessToken");
     toggleDrawer();
-    router.replace("/(auth)/login");
+    await logout();
+    router.replace("/(auth)/login/login"); 
   };
 
   const openInvitationsModal = () => {

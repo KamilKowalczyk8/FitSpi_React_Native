@@ -56,7 +56,6 @@ export function useWorkoutInbox(visible: boolean) {
     try {
       await WorkoutController.rejectWorkout(token, id);
       
-      // Usuwamy z listy (w: PendingWorkout)
       setWorkouts((prev) => prev.filter((w: PendingWorkout) => w.id !== id));
       
       Alert.alert("Info", "Trening został odrzucony.");

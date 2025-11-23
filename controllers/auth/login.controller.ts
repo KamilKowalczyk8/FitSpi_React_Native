@@ -14,10 +14,12 @@ export function useLoginController() {
   );
 
   const handleLogin = async () => {
+    console.log("🔴 [CONTROLLER] Kliknięto login. Dane:", { email, password, rememberMe });
     try {
       loginSchema.parse({ email, password, rememberMe });
 
       const success = await login(email, password, rememberMe);
+      console.log("🔴 [CONTROLLER] Wynik logowania:", success);
       if (success) {
         router.replace('/(tabs)/workout');
       } else {
@@ -32,6 +34,7 @@ export function useLoginController() {
             newErrors.password = issue.message;
         }
         setErrors(newErrors);
+        console.error("🔴 [CONTROLLER] Błąd:", error);
       } else {
         alert('Wystąpił nieoczekiwany błąd');
       }
