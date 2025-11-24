@@ -61,5 +61,9 @@
     "eslint-config-expo": "~9.2.0",
     "typescript": "~5.8.3"
   },
+  "overrides": {
+    "glob": "^10.4.5",
+    "brace-expansion": "^2.0.1"
+  },
   "private": true
 }

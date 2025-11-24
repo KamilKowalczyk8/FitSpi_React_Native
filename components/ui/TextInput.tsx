@@ -1,7 +1,19 @@
-import { Controller } from 'react-hook-form';
+import { Control, Controller } from 'react-hook-form';
 import { TextInput as RNTextInput, StyleSheet, Text, View } from 'react-native';
 
-export const TextInput = ({ name, control, label, secureTextEntry = false }) => (
+interface TextInputProps {
+  name: string;
+  control: Control<any>; 
+  label: string;
+  secureTextEntry?: boolean; 
+}
+
+export const TextInput = ({ 
+  name, 
+  control, 
+  label, 
+  secureTextEntry = false 
+}: TextInputProps) => (
   <Controller
     control={control}
     name={name}
