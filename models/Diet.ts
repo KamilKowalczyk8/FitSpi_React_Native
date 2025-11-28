@@ -5,15 +5,34 @@ export interface FoodLogItem {
   protein: number;
   carbs: number;
   fats: number;
-  weight_g: number; // waga w gramach
+  weight_g: number; 
   date: string;
-  meal_type?: string; // np. 'breakfast', 'lunch', etc.
+  meal_type?: string; 
 }
 
-// Podsumowanie makroskładników dla całego dnia
 export interface DailySummary {
   totalCalories: number;
   totalProtein: number;
   totalCarbs: number;
   totalFats: number;
+}
+export interface NutritionTargets {
+  kcal: number;
+  protein: number;
+  fat: number;
+  carbs: number;
+}
+
+export interface NutritionSummary {
+  kcal: number;
+  protein: number;
+  fat: number;
+  carbs: number;
+}
+
+export interface DailyDietResponse {
+  date: string;
+  targets: NutritionTargets;
+  summary: NutritionSummary;
+  foods: FoodLogItem[];
 }

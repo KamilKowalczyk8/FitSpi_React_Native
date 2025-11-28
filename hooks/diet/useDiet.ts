@@ -1,17 +1,17 @@
 import { DietController } from '@/controllers/diet/diet.controller';
 import { useAuth } from '@/hooks/useAuth';
-import { DailySummary, FoodLogItem } from '@/models/Diet';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { DailyDietResponse } from '@/models/Diet'; // Używamy nowego typu
+import { useCallback, useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 
 export const useDiet = (selectedDate: Date) => {
   const { token } = useAuth();
   
-  const [foodLogs, setFoodLogs] = useState<FoodLogItem[]>([]);
+  const [dailyData, setDailyData] = useState<DailyDietResponse | null>(null);
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Funkcja pobierająca dane
   const fetchLogs = useCallback(async () => {
     if (!token) return;
     
@@ -19,51 +19,40 @@ export const useDiet = (selectedDate: Date) => {
     setError(null);
     
     try {
-      const data = await DietController.getDailyLogs(token, selectedDate);
-      setFoodLogs(data);
+      const data = await DietController.getDailyData(token, selectedDate);
+      setDailyData(data);
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Błąd pobierania diety");
-      // Opcjonalnie: wyczyść listę w razie błędu, aby nie pokazywać starych danych
-      setFoodLogs([]); 
+      setError(err.message || "Błąd pobierania danych");
+      setDailyData(null);
     } finally {
       setLoading(false);
     }
   }, [token, selectedDate]);
 
-  // Pobieraj dane za każdym razem, gdy zmieni się data lub token
   useEffect(() => {
     fetchLogs();
   }, [fetchLogs]);
 
-  // Funkcja usuwania
   const deleteLog = async (id: number) => {
     if (!token) return;
     try {
       await DietController.deleteLog(token, id);
-      // Aktualizuj stan lokalnie bez ponownego pobierania (szybciej)
-      setFoodLogs(prev => prev.filter(item => item.id !== id));
+      // Najprościej: odświeżamy dane z serwera po usunięciu
+      fetchLogs(); 
     } catch (err: any) {
       Alert.alert("Błąd", "Nie udało się usunąć produktu");
     }
   };
 
-  // Obliczanie podsumowania dnia (używamy useMemo dla wydajności)
-  const summary: DailySummary = useMemo(() => {
-    return foodLogs.reduce(
-      (acc, item) => ({
-        totalCalories: acc.totalCalories + (item.calories || 0),
-        totalProtein: acc.totalProtein + (item.protein || 0),
-        totalCarbs: acc.totalCarbs + (item.carbs || 0),
-        totalFats: acc.totalFats + (item.fats || 0),
-      }),
-      { totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFats: 0 }
-    );
-  }, [foodLogs]);
+  const emptyTargets = { kcal: 0, protein: 0, fat: 0, carbs: 0 };
+  const emptySummary = { kcal: 0, protein: 0, fat: 0, carbs: 0 };
 
   return {
-    foodLogs,
-    summary,
+    foodLogs: dailyData?.foods || [], 
+    targets: dailyData?.targets || emptyTargets, 
+    summary: dailyData?.summary || emptySummary, 
+    
     loading,
     error,
     refresh: fetchLogs,

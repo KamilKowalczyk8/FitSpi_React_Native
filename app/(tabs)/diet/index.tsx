@@ -2,30 +2,20 @@ import SettingsDrawer from '@/components/SettingsDrawer';
 import { DietSummary } from '@/components/diet/DietSummary';
 import { DateSlider } from '@/components/workout/DateSlider';
 import { useDiet } from '@/hooks/diet/useDiet';
-import { useDietGoals } from '@/hooks/diet/useDietGoals';
 import { useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const DietScreen = () => {
+
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const { foodLogs, targets, summary, loading, deleteLog } = useDiet(selectedDate);
 
-  // 1. Pobieramy listę jedzenia i surowe podsumowanie
-  const { foodLogs, summary, loading, deleteLog } = useDiet(selectedDate);
-
-  // 2. Przeliczamy to na cele (Fitatu style)
-  const { goals, consumed } = useDietGoals(summary);
 
   return (
     <View style={styles.container}>
+      <SettingsDrawer />  
+      <Text style={styles.heading}>Twoja dieta</Text> 
       
-      {/* Header */}
-      <View style={styles.headerContainer}>
-        <Text style={styles.heading}>Twoja dieta</Text>
-        <View style={styles.settingsWrapper}>
-          <SettingsDrawer />   
-        </View>
-      </View>
-
       {/* Slider daty */}
       <View style={styles.dateContainer}>
         <DateSlider 
@@ -49,9 +39,10 @@ const DietScreen = () => {
                 renderItem={({ item }) => (
                     <View style={styles.logItem}>
                         <View style={{flex: 1}}>
-                            <Text style={styles.productName}>{item.product_name}</Text>
+                            {/* Upewnij się, że nazwy pól pasują do tego co zwraca API (np. product.name vs product_name) */}
+                            <Text style={styles.productName}>{item.product_name || 'Produkt'}</Text>
                             <Text style={styles.productDetails}>
-                                {item.weight_g}g • {item.calories} kcal • B: {item.protein} T: {item.fats} W: {item.carbs}
+                                {item.weight_g}g • {Math.round(item.calories)} kcal • B: {Math.round(item.protein)} T: {Math.round(item.fats)} W: {Math.round(item.carbs)}
                             </Text>
                         </View>
                         <TouchableOpacity onPress={() => deleteLog(item.id)} style={{padding: 5}}>
@@ -63,11 +54,24 @@ const DietScreen = () => {
         )}
       </View>
 
-      {/* Dolny komponent Podsumowania (Czyste przekazanie danych) */}
-      <DietSummary 
-        consumed={consumed} 
-        goals={goals} 
-      />
+      {/* Dolny komponent Podsumowania */}
+      {/* Renderujemy go tylko, gdy mamy dane summary i targets */}
+      {summary && targets && (
+          <DietSummary 
+            consumed={{
+                calories: summary.kcal,
+                protein: summary.protein,
+                fats: summary.fat, 
+                carbs: summary.carbs
+            }}
+            goals={{
+                calories: targets.kcal,
+                protein: targets.protein,
+                fats: targets.fat,
+                carbs: targets.carbs
+            }}
+          />
+      )}
 
     </View>
   );
@@ -79,28 +83,11 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     backgroundColor: "#fff",
   },
-  headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 15,
-    position: 'relative',
-    height: 50,
-  },
   heading: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "bold",
-    color: "#333",
     textAlign: "center",
-  },
-  settingsWrapper: {
-    position: 'absolute',
-    right: 20,
-    top: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    zIndex: 10,
+    marginBottom: 10,
   },
   dateContainer: {
     paddingBottom: 10,

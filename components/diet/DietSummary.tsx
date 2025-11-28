@@ -17,23 +17,22 @@ interface DietSummaryProps {
 }
 
 export const DietSummary: React.FC<DietSummaryProps> = ({ consumed, goals }) => {
-  
   const renderItem = (
     label: string, 
-    current: number, 
-    max: number, 
+    current: number | undefined | null, 
+    max: number | undefined | null, 
     color: string,
     unit: string = 'g'
   ) => {
-    // Zabezpieczenie przed dzieleniem przez zero i ograniczenie do 100%
-    const percentage = max > 0 ? Math.min(Math.max(current / max, 0), 1) : 0;
+    const safeCurrent = current || 0;
+    const safeMax = max || 0;
+
+    const percentage = safeMax > 0 ? Math.min(Math.max(safeCurrent / safeMax, 0), 1) : 0;
     
     return (
       <View style={styles.column}>
-        {/* Etykieta na górze (np. BIAŁKO) */}
         <Text style={styles.label}>{label}</Text>
         
-        {/* Pasek postępu (Poziomy) */}
         <View style={styles.track}>
           <View 
             style={[
@@ -46,10 +45,9 @@ export const DietSummary: React.FC<DietSummaryProps> = ({ consumed, goals }) => 
           />
         </View>
 
-        {/* Wartości na dole (np. 60/120g) */}
         <Text style={styles.valueText}>
-          <Text style={styles.current}>{current.toFixed(0)}</Text>
-          <Text style={styles.max}>/{max}{unit}</Text>
+          <Text style={styles.current}>{safeCurrent.toFixed(0)}</Text>
+          <Text style={styles.max}>/{safeMax}{unit}</Text>
         </Text>
       </View>
     );
@@ -57,41 +55,33 @@ export const DietSummary: React.FC<DietSummaryProps> = ({ consumed, goals }) => 
 
   return (
     <View style={styles.container}>
-      {/* 1. Kcal */}
-      {renderItem('Kcal', consumed.calories, goals.calories, '#34C759', '')}
-      
-      {/* 2. Białko */}
-      {renderItem('Białko', consumed.protein, goals.protein, '#1E90FF')}
-      
-      {/* 3. Tłuszcze */}
-      {renderItem('Tłuszcze', consumed.fats, goals.fats, '#FFD700')}
-      
-      {/* 4. Węglowodany */}
-      {renderItem('Węgle', consumed.carbs, goals.carbs, '#FF4500')}
+      {renderItem('Kcal', consumed?.calories, goals?.calories, '#34C759', '')}
+      {renderItem('Białko', consumed?.protein, goals?.protein, '#1E90FF')}
+      {renderItem('Tłuszcze', consumed?.fats, goals?.fats, '#FFD700')}
+      {renderItem('Węgle', consumed?.carbs, goals?.carbs, '#FF4500')}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row', // Elementy obok siebie
+    flexDirection: 'row', 
     justifyContent: 'space-between',
     backgroundColor: '#fff',
     paddingVertical: 8,
     paddingHorizontal: 15,
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
-    // Cień
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.05,
     shadowRadius: 6,
     elevation: 8,
-    gap: 10, // Odstęp między kolumnami
+    gap: 10, 
   },
   column: {
-    flex: 1, // Każdy element zajmuje równą szerokość
-    alignItems: 'center', // Wyśrodkowanie treści w kolumnie
+    flex: 1, 
+    alignItems: 'center', 
   },
   label: {
     fontSize: 11,

@@ -15,6 +15,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import InvitationsModal from "./coach/InvitationsModal";
 import WorkoutInboxModal from "./coach/WorkoutInboxModal";
+import UserProfileModal from "./diet/UserProfileModal";
 
 
 const { width } = Dimensions.get("window");
@@ -23,6 +24,7 @@ export const SettingsDrawer: React.FC = () => {
   const [visible, setVisible] = useState(false);
   const [slideAnim] = useState(new Animated.Value(width));
   const [invitationsVisible, setInvitationsVisible] = useState(false);
+  const [profileVisible, setProfileVisible] = useState(false);
 
   const [inboxVisible, setInboxVisible] = useState(false);
 
@@ -62,6 +64,11 @@ export const SettingsDrawer: React.FC = () => {
     setTimeout(() => setInboxVisible(true), 300); 
   };
 
+  const openProfileModal = () => {
+    toggleDrawer();
+    setTimeout(() => setProfileVisible(true), 300);
+  }
+
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={toggleDrawer} style={styles.gearButton}>
@@ -89,6 +96,13 @@ export const SettingsDrawer: React.FC = () => {
               <Text style={styles.optionText}>💪 Treningi od trenera</Text>
             </TouchableOpacity>
 
+            <TouchableOpacity 
+              style={styles.optionButton} 
+              onPress={openProfileModal}
+            >
+              <Text style={styles.optionText}>👤 Twój Profil</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity style={styles.optionButton}>
               <Text style={styles.optionText}>⚙️ Ustawienia</Text>
             </TouchableOpacity>
@@ -107,6 +121,10 @@ export const SettingsDrawer: React.FC = () => {
         visible={inboxVisible}
         onClose={() => setInboxVisible(false)}
       />
+      <UserProfileModal
+        visible={profileVisible}
+        onClose={() => setProfileVisible(false)}
+      />
 
     </View>
   );
@@ -115,7 +133,7 @@ export const SettingsDrawer: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    top: 40,
+    top: 39,
     right: 20,
     zIndex: 100,
   },
