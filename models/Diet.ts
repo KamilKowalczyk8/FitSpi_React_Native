@@ -1,13 +1,32 @@
+export interface Product {
+  id: number;
+  name: string;
+  kcal: number; 
+  protein?: number;
+  carbs?: number;
+  fats?: number;
+}
+
+
 export interface FoodLogItem {
   id: number;
   product_name: string;
-  calories: number;
+  kcal: number;
   protein: number;
   carbs: number;
   fats: number;
   weight_g: number; 
   date: string;
-  meal_type?: string; 
+  meal: MealType; 
+}
+
+export enum MealType {
+  Sniadanie = 1,
+  Lunch = 2,
+  Obiad = 3,
+  Przekaska = 4,
+  Kolacja = 5,
+  Snack = 6 
 }
 
 export interface DailySummary {
@@ -26,7 +45,7 @@ export interface NutritionTargets {
 export interface NutritionSummary {
   kcal: number;
   protein: number;
-  fat: number;
+  fats: number;
   carbs: number;
 }
 
@@ -35,4 +54,11 @@ export interface DailyDietResponse {
   targets: NutritionTargets;
   summary: NutritionSummary;
   foods: FoodLogItem[];
+}
+
+export interface AddFoodPayload {
+  productId: number;
+  date: Date;
+  meal: MealType;
+  grams: number;
 }

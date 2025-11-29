@@ -1,6 +1,6 @@
-import { UserProfileController } from '@/controllers/diet/user.profile.controller'; // Dostosuj ścieżkę
+import { UserProfileController } from '@/controllers/diet/user.profile.controller';
 import { useAuth } from '@/hooks/useAuth';
-import { ActivityLevel, DietGoal, Gender, UserProfileData } from '@/models/Profile'; // Dostosuj ścieżkę
+import { ActivityLevel, DietGoal, Gender, UserProfileData } from '@/models/Profile';
 import { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 

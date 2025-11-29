@@ -1,4 +1,4 @@
-import { DailyDietResponse } from "@/models/Diet";
+import { AddFoodPayload, DailyDietResponse } from "@/models/Diet";
 
 export const DietController = {
   getDailyData: async (token: string, date: Date): Promise<DailyDietResponse> => {
@@ -20,6 +20,34 @@ export const DietController = {
 
     if (!response.ok) {
       throw new Error(result.message || "Nie udało się pobrać danych dziennika");
+    }
+
+    return result;
+  },
+
+
+  addFood: async (token: string, payload: AddFoodPayload) => {
+    const API_URL = process.env.EXPO_PUBLIC_API_URL;
+    if (!token) throw new Error("Brak tokena!");
+
+    const response = await fetch(`${API_URL}/foods`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        productId: payload.productId,
+        date: payload.date.toISOString(), 
+        meal: payload.meal,
+        grams: payload.grams,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || "Nie udało się dodać posiłku");
     }
 
     return result;

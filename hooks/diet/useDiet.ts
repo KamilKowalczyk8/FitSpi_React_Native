@@ -1,6 +1,6 @@
 import { DietController } from '@/controllers/diet/diet.controller';
 import { useAuth } from '@/hooks/useAuth';
-import { DailyDietResponse } from '@/models/Diet'; // Używamy nowego typu
+import { DailyDietResponse } from '@/models/Diet';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 
@@ -38,7 +38,6 @@ export const useDiet = (selectedDate: Date) => {
     if (!token) return;
     try {
       await DietController.deleteLog(token, id);
-      // Najprościej: odświeżamy dane z serwera po usunięciu
       fetchLogs(); 
     } catch (err: any) {
       Alert.alert("Błąd", "Nie udało się usunąć produktu");
@@ -46,7 +45,7 @@ export const useDiet = (selectedDate: Date) => {
   };
 
   const emptyTargets = { kcal: 0, protein: 0, fat: 0, carbs: 0 };
-  const emptySummary = { kcal: 0, protein: 0, fat: 0, carbs: 0 };
+  const emptySummary = { kcal: 0, protein: 0, fats: 0, carbs: 0 };
 
   return {
     foodLogs: dailyData?.foods || [], 
