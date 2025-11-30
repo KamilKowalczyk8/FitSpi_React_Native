@@ -1,29 +1,30 @@
 import { DietController } from '@/controllers/diet/diet.controller';
 import { useAuth } from '@/hooks/useAuth';
-import { DailyDietResponse } from '@/models/Diet';
-import { useCallback, useEffect, useState } from 'react';
+import { DailyDietResponse, FoodLogItem, MealType } from '@/models/Diet';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert } from 'react-native';
+
+interface CopyMealArgs {
+  targetDate: Date;
+  mealId: MealType;
+}
 
 export const useDiet = (selectedDate: Date) => {
   const { token } = useAuth();
   
   const [dailyData, setDailyData] = useState<DailyDietResponse | null>(null);
-  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchLogs = useCallback(async () => {
     if (!token) return;
-    
     setLoading(true);
     setError(null);
-    
     try {
       const data = await DietController.getDailyData(token, selectedDate);
       setDailyData(data);
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Błąd pobierania danych");
       setDailyData(null);
     } finally {
       setLoading(false);
@@ -44,17 +45,51 @@ export const useDiet = (selectedDate: Date) => {
     }
   };
 
+  const copyMeal = async ({ targetDate, mealId }: CopyMealArgs) => {
+    if (!token) return;
+    try {
+        await DietController.copyMeal(token, {
+            sourceDate: selectedDate,
+            targetDate: targetDate,
+            meal: mealId
+        });
+        Alert.alert("Sukces", "Posiłek został skopiowany!");
+        
+        if (targetDate.toDateString() === selectedDate.toDateString()) {
+            fetchLogs();
+        }
+    } catch (e: any) {
+        Alert.alert("Błąd", e.message || "Nie udało się skopiować posiłku");
+    }
+  };
+
+  const foodLogs = dailyData?.foods || [];
+  
+  const groupedMeals = useMemo(() => {
+    const groups: Record<number, FoodLogItem[]> = {};
+    foodLogs.forEach((item) => {
+      const mealId = (item.meal as unknown as number) || MealType.Snack; 
+      if (!groups[mealId]) groups[mealId] = [];
+      groups[mealId].push(item);
+    });
+    return groups;
+  }, [foodLogs]);
+
   const emptyTargets = { kcal: 0, protein: 0, fat: 0, carbs: 0 };
-  const emptySummary = { kcal: 0, protein: 0, fats: 0, carbs: 0 };
+  const emptySummary = { kcal: 0, protein: 0, fat: 0, carbs: 0 };
 
   return {
-    foodLogs: dailyData?.foods || [], 
-    targets: dailyData?.targets || emptyTargets, 
-    summary: dailyData?.summary || emptySummary, 
+    foodLogs,
+    targets: dailyData?.targets || emptyTargets,
+    summary: dailyData?.summary || emptySummary,
     
+    groupedMeals,
+
     loading,
     error,
+
     refresh: fetchLogs,
-    deleteLog
+    deleteLog,
+    copyMeal
   };
 };

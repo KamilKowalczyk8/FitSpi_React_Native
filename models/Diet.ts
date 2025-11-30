@@ -62,3 +62,8 @@ export interface AddFoodPayload {
   meal: MealType;
   grams: number;
 }
+export interface CopyMealPayload {
+  sourceDate: Date;
+  targetDate: Date;
+  meal: MealType;
+}

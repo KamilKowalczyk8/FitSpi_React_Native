@@ -1,4 +1,5 @@
 import { FoodLogItem } from '@/models/Diet';
+import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
     LayoutAnimation,
@@ -10,6 +11,7 @@ import {
     View
 } from 'react-native';
 import { FoodListItem } from './FoodListItem';
+import { MealOptionsModal } from './MealOptionsModal';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -20,7 +22,7 @@ interface Props {
   items: FoodLogItem[];
   onDelete: (id: number) => void;
   color: string;
-  defaultExpanded?: boolean;
+  onCopy: () => void;
 }
 
 export const MealSection: React.FC<Props> = ({ 
@@ -28,15 +30,15 @@ export const MealSection: React.FC<Props> = ({
   items, 
   onDelete, 
   color, 
-  defaultExpanded = true 
+  onCopy 
 }) => {
-  const [expanded, setExpanded] = useState(defaultExpanded);
+  const [expanded, setExpanded] = useState(true);
+  const [menuVisible, setMenuVisible] = useState(false);
 
   const totalKcal = items.reduce((sum, item) => sum + (item.kcal || 0), 0);
   const totalProtein = items.reduce((sum, item) => sum + (item.protein || 0), 0);
   const totalFats = items.reduce((sum, item) => sum + (item.fats || 0), 0);
-    const totalCarbs = items.reduce((sum, item) => sum + (item.carbs || 0), 0);
-
+  const totalCarbs = items.reduce((sum, item) => sum + (item.carbs || 0), 0);
 
   const toggleExpand = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -45,35 +47,52 @@ export const MealSection: React.FC<Props> = ({
 
   return (
     <View style={[styles.container, { borderLeftColor: color }]}> 
-      {/* Nagłówek Sekcji */}
-      <TouchableOpacity 
-        onPress={toggleExpand} 
-        style={[styles.header, { borderBottomColor: expanded ? '#eee' : 'transparent' }]} 
-        activeOpacity={0.7}
-      >
-        <View style={styles.headerTitleRow}>
-          {/* Kropka z kolorem */}
-          <View style={[styles.dot, { backgroundColor: color }]} />
-          
-          <Text style={styles.title}>{title}</Text>
-          <Text style={[styles.kcalInfo, { color: color }]}>
-             {Math.round(totalKcal)} kcal
-          </Text>
-          <Text style={[styles.kcalInfo, { color: color }]}>
-             B: {Math.round(totalProtein)} 
-          </Text>
-          <Text style={[styles.kcalInfo, { color: color }]}>
-              T: {Math.round(totalFats)}
-          </Text>
-           <Text style={[styles.kcalInfo, { color: color }]}>
-              W: {Math.round(totalCarbs)}
-          </Text>
-          
-        </View>
-        <Text style={styles.arrow}>{expanded ? '▲' : '▼'}</Text>
-      </TouchableOpacity>
+      
+      {/* NAGŁÓWEK - JEDEN WIERSZ */}
+      <View style={[styles.header, { borderBottomColor: expanded ? '#f5f5f5' : 'transparent' }]}>
+        
+        {/* LEWA STRONA (Rozwijanie): Tytuł + Makro */}
+        <TouchableOpacity 
+            onPress={toggleExpand} 
+            style={styles.headerMain} 
+            activeOpacity={0.7}
+        >
+            <View style={styles.headerRow}>
+                {/* Kropka */}
+                <View style={[styles.dot, { backgroundColor: color }]} />
+                
+                {/* Tytuł */}
+                <Text style={styles.title}>{title}</Text>
+                
+                {/* Kalorie */}
+                <Text style={[styles.kcalText, { color: color }]}>
+                    {Math.round(totalKcal)} kcal
+                </Text>
 
-      {/* Lista Produktów */}
+                {/* Makro (Małe, w jednej linii) */}
+                <View style={styles.macrosContainer}>
+                    <Text style={styles.macroText}>B:{Math.round(totalProtein)}</Text>
+                    <Text style={styles.macroText}>T:{Math.round(totalFats)}</Text>
+                    <Text style={styles.macroText}>W:{Math.round(totalCarbs)}</Text>
+                </View>
+            </View>
+
+            {/* Strzałka (przyklejona do lewej sekcji, ale na końcu) */}
+            <Text style={styles.arrow}>{expanded ? '▲' : '▼'}</Text>
+        </TouchableOpacity>
+
+        {/* PRAWA STRONA: 3 KROPKI (Opcje) */}
+        <TouchableOpacity 
+            onPress={() => setMenuVisible(true)} 
+            style={styles.menuButton}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+            <Ionicons name="ellipsis-vertical" size={18} color="#aaa" />
+        </TouchableOpacity>
+
+      </View>
+
+      {/* LISTA PRODUKTÓW */}
       {expanded && (
         <View style={styles.content}>
           {items.map((item) => (
@@ -83,56 +102,97 @@ export const MealSection: React.FC<Props> = ({
           ))}
         </View>
       )}
+
+      {/* MODAL OPCJI */}
+      <MealOptionsModal 
+        visible={menuVisible}
+        onClose={() => setMenuVisible(false)}
+        onCopy={onCopy}
+        title={`Opcje: ${title}`}
+      />
+
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 12,
+    marginBottom: 10, 
     backgroundColor: '#fff',
-    borderRadius: 12,
-    marginHorizontal: 20,
+    borderRadius: 10,
+    marginHorizontal: 15,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
-    borderLeftWidth: 5, 
+    borderLeftWidth: 4, 
     overflow: 'hidden'
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 15,
+    height: 50, 
     backgroundColor: '#fff',
     borderBottomWidth: 1,
   },
-  headerTitleRow: {
+  headerMain: {
+    flex: 1, 
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    justifyContent: 'space-between',
+    paddingLeft: 10,
+    paddingRight: 5,
+    height: '100%',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1, 
   },
   dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginRight: 8,
   },
   title: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
+    marginRight: 8,
   },
-  kcalInfo: {
+  kcalText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
+    marginRight: 8,
+  },
+  macrosContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  macroText: {
+    fontSize: 14, 
+    color: '#888',
+    marginRight: 6,
   },
   arrow: {
-    fontSize: 14,
-    color: '#999',
+    fontSize: 10,
+    color: '#ccc',
+    paddingHorizontal: 5,
   },
+  
+  // Przycisk Menu
+  menuButton: {
+    width: 40,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderLeftWidth: 1,
+    borderLeftColor: '#f9f9f9', // Bardzo delikatna separacja
+  },
+  
   content: {
-    paddingBottom: 5,
+    paddingBottom: 0,
   },
 });

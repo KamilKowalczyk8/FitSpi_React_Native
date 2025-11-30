@@ -1,4 +1,5 @@
-import { AddFoodPayload, DailyDietResponse } from "@/models/Diet";
+import { toDateString } from "@/app/utils/dateHelper";
+import { AddFoodPayload, CopyMealPayload, DailyDietResponse } from "@/models/Diet";
 
 export const DietController = {
   getDailyData: async (token: string, date: Date): Promise<DailyDietResponse> => {
@@ -6,7 +7,7 @@ export const DietController = {
     
     if (!token) throw new Error("Brak tokena!");
 
-    const dateString = date.toISOString().split('T')[0];
+    const dateString = toDateString(date);
 
     const response = await fetch(`${API_URL}/foods?date=${dateString}`, {
       method: "GET",
@@ -52,6 +53,30 @@ export const DietController = {
 
     return result;
   },
+
+  copyMeal: async (token: string, payload: CopyMealPayload) => {
+    const API_URL = process.env.EXPO_PUBLIC_API_URL;
+    if (!token) throw new Error("Brak tokena!");
+
+    const response = await fetch(`${API_URL}/foods/copy-meal`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        sourceDate: payload.sourceDate.toISOString(),
+        targetDate: payload.targetDate.toISOString(),
+        meal: payload.meal,
+      }),
+    });
+
+    if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || "Nie udało się skopiować posiłku");
+    }
+    return true;
+    },
 
   deleteLog: async (token: string, logId: number) => {
     const API_URL = process.env.EXPO_PUBLIC_API_URL;
