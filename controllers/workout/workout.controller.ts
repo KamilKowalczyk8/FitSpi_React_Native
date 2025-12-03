@@ -135,7 +135,7 @@ deleteWorkout: async (token: string, workoutId: number) => {
 
         const result = await response.json();
         if (!response.ok){
-            throw new Error(result.message || 'Nie udało się zmienic tytuł€ treningu');
+            throw new Error(result.message || 'Nie udało się zmienic tytułu treningu');
         }
 
         return result;

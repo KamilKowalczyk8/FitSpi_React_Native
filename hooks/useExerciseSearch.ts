@@ -10,10 +10,8 @@ export const useExerciseSearch = () => {
   const [templates, setTemplates] = useState<ExerciseTemplate[]>([]);
   const [filtered, setFiltered] = useState<ExerciseTemplate[]>([]);
   const [search, setSearch] = useState("");
-  const [selectedTemplate, setSelectedTemplate] =
-    useState<ExerciseTemplate | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<ExerciseTemplate | null>(null);
   const [isInputFocused, setIsInputFocused] = useState(false);
-
   const isSelecting = useRef(false);
 
   useEffect(() => {
@@ -23,7 +21,7 @@ export const useExerciseSearch = () => {
         setTemplates(data);
         setFiltered(data);
       } catch (err) {
-        console.error("❌ Błąd przy pobieraniu ćwiczeń:", err);
+        console.error("Błąd przy pobieraniu ćwiczeń:", err);
       }
     };
     fetchTemplates();

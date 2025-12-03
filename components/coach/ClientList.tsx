@@ -7,7 +7,7 @@ interface ClientListProps {
   clients: ClientResponse[];
   isLoading: boolean;
   error: string | null;
-  onBrowseWorkouts: (client: ClientResponse) => void; // <-- Oczekujemy handlera
+  onBrowseWorkouts: (client: ClientResponse) => void; 
 }
 
 const ClientList: React.FC<ClientListProps> = ({ clients, isLoading, error, onBrowseWorkouts }) => {
