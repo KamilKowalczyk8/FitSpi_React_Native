@@ -1,20 +1,30 @@
 import { useExerciseSearch } from '@/hooks/useExerciseSearch';
+import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from "react";
 import {
   FlatList,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   StyleSheet,
   Switch,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
-interface ExerciseTemplate {
-  id: number;
-  name: string;
-}
+const COLORS = {
+  overlay: 'rgba(0, 0, 0, 0.75)',
+  modalBg: '#1E1E1E',
+  inputBg: '#2C2C2C',
+  primary: '#2979FF',
+  text: '#FFFFFF',
+  textSecondary: '#B0B0B0',
+  border: '#333333',
+  danger: '#FF5252',
+};
+
 
 interface ExerciseAddProps {
   modalVisible: boolean;
@@ -55,9 +65,8 @@ export const ExerciseAdd: React.FC<ExerciseAddProps> = ({
   const [weight, setWeight] = useState("");
   const [unit, setUnit] = useState<"kg" | "lbs">("kg");
 
-useEffect(() => {
+  useEffect(() => {
     if (modalVisible && initialData) {
-      
       const template = {
         id: initialData.templateId,
         name: initialData.name,
@@ -70,7 +79,6 @@ useEffect(() => {
       setWeight(String(initialData.weight || ""));
       setUnit(initialData.weightUnits || "kg");
     }
-
   }, [modalVisible, initialData, setSelectedTemplate, setSearch]);
 
   const handleSave = () => {
@@ -100,7 +108,6 @@ useEffect(() => {
     onClose();
   };
 
-
   return (
     <Modal
       visible={modalVisible}
@@ -108,112 +115,145 @@ useEffect(() => {
       transparent
       onRequestClose={handleCloseModal}
     >
-      <View style={styles.overlay}>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.overlay}
+      >
         <View style={styles.container}>
-          <Text style={styles.heading}>Dodaj ćwiczenie</Text>
+          <Text style={styles.heading}>
+            {initialData ? "Edytuj ćwiczenie" : "Dodaj ćwiczenie"}
+          </Text>
 
           <View style={styles.searchContainer}>
-            <TextInput
-              style={[
-                styles.searchInput,
-                selectedTemplate && styles.searchInputSelected,
-              ]}
-              placeholder="Wpisz nazwę ćwiczenia..."
-              value={search} 
-              editable={!selectedTemplate} 
-              onChangeText={handleSearch}
-              onFocus={handleInputFocus} 
-              onBlur={handleInputBlur}
-            />
+            <View style={styles.inputWrapper}>
+                <TextInput
+                style={[
+                    styles.searchInput,
+                    selectedTemplate && styles.searchInputSelected,
+                ]}
+                placeholder="Wpisz nazwę ćwiczenia..."
+                placeholderTextColor="#666"
+                value={search} 
+                editable={!selectedTemplate} 
+                onChangeText={handleSearch}
+                onFocus={handleInputFocus} 
+                onBlur={handleInputBlur}
+                />
+                
+                {!search && !selectedTemplate && (
+                    <Ionicons name="search" size={20} color="#666" style={styles.inputIcon} />
+                )}
+            </View>
 
             {selectedTemplate && (
               <TouchableOpacity 
                 style={styles.clearButton} 
                 onPress={handleClear} 
               >
-                <Text style={styles.clearButtonText}>✖</Text>
+                <Ionicons name="close-circle" size={24} color={COLORS.textSecondary} />
               </TouchableOpacity>
             )}
 
             {isListVisible && (
-              <FlatList
-                data={filtered}
-                keyExtractor={(item) => item.id.toString()}
-                style={styles.absoluteList}
-                keyboardShouldPersistTaps="handled" 
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={styles.item}
-                    onPress={() => handleTemplateSelect(item)}
-                  >
-                    <Text style={styles.itemText}>{item.name}</Text>
-                  </TouchableOpacity>
-                )}
-                ListEmptyComponent={
-                  <Text style={styles.noResults}>Brak wyników dla "{search}"</Text>
-                }
-              />
+              <View style={styles.dropdownContainer}>
+                  <FlatList
+                    data={filtered}
+                    keyExtractor={(item) => item.id.toString()}
+                    style={styles.absoluteList}
+                    keyboardShouldPersistTaps="handled" 
+                    renderItem={({ item }) => (
+                      <TouchableOpacity
+                        style={styles.item}
+                        onPress={() => handleTemplateSelect(item)}
+                      >
+                        <Text style={styles.itemText}>{item.name}</Text>
+                      </TouchableOpacity>
+                    )}
+                    ListEmptyComponent={
+                      <Text style={styles.noResults}>Brak wyników dla "{search}"</Text>
+                    }
+                  />
+              </View>
             )}
           </View>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Serie"
-            keyboardType="numeric"
-            value={sets}
-            onChangeText={setSets}
-            editable={!!selectedTemplate}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Powtórzenia"
-            keyboardType="numeric"
-            value={reps}
-            onChangeText={setReps}
-            editable={!!selectedTemplate}
-          />
-          <View style={styles.weightRow}>
-            <TextInput
-              style={[styles.input, { flex: 1 }]}
-              placeholder="Ciężar (opcjonalnie)"
-              keyboardType="numeric"
-              value={weight}
-              onChangeText={setWeight}
-              editable={!!selectedTemplate}
-            />
-
-          <View style={styles.switchContainer}>
-            <Text style={[styles.switchLabel, unit === "kg" && styles.switchLabelActive]}>
-            kg
-            </Text>
-            <Switch
-              value={unit === "lbs"}
-              onValueChange={(val) => setUnit(val ? "lbs" : "kg")}
-              disabled={!selectedTemplate}
-            />
-            <Text style={[styles.switchLabel, unit === "lbs" && styles.switchLabelActive]}>
-            lbs
-            </Text>
+          <View style={styles.formRow}>
+              <View style={styles.halfInput}>
+                <Text style={styles.label}>Serie</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="0"
+                    placeholderTextColor="#666"
+                    keyboardType="numeric"
+                    value={sets}
+                    onChangeText={setSets}
+                    editable={!!selectedTemplate}
+                />
+              </View>
+              <View style={styles.halfInput}>
+                <Text style={styles.label}>Powt.</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="0"
+                    placeholderTextColor="#666"
+                    keyboardType="numeric"
+                    value={reps}
+                    onChangeText={setReps}
+                    editable={!!selectedTemplate}
+                />
+              </View>
           </View>
+
+          <View style={styles.weightRow}>
+            <View style={{ flex: 1 }}>
+                <Text style={styles.label}>Ciężar</Text>
+                <TextInput
+                style={styles.input}
+                placeholder="0"
+                placeholderTextColor="#666"
+                keyboardType="numeric"
+                value={weight}
+                onChangeText={setWeight}
+                editable={!!selectedTemplate}
+                />
+            </View>
+
+            <View style={styles.switchContainer}>
+              <Text style={[styles.switchLabel, unit === "kg" && styles.switchLabelActive]}>
+                kg
+              </Text>
+              <Switch
+                value={unit === "lbs"}
+                onValueChange={(val) => setUnit(val ? "lbs" : "kg")}
+                disabled={!selectedTemplate}
+                trackColor={{ false: "#555", true: COLORS.primary }}
+                thumbColor={"#FFF"}
+              />
+              <Text style={[styles.switchLabel, unit === "lbs" && styles.switchLabelActive]}>
+                lbs
+              </Text>
+            </View>
           </View>
 
           <View style={styles.buttonRow}>
+            <TouchableOpacity style={styles.cancelButton} onPress={handleCloseModal}>
+              <Text style={styles.cancelButtonText}>Anuluj</Text>
+            </TouchableOpacity>
+            
             <TouchableOpacity 
               style={[
                 styles.saveButton, 
-                !selectedTemplate && {backgroundColor: '#ccc'}
+                !selectedTemplate && styles.saveButtonDisabled
               ]} 
               onPress={handleSave}
               disabled={!selectedTemplate}
             >
-              <Text style={styles.buttonText}>Zapisz</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.cancelButton} onPress={handleCloseModal}>
-              <Text style={styles.buttonText}>Anuluj</Text>
+              <Text style={styles.saveButtonText}>Zapisz</Text>
             </TouchableOpacity>
           </View>
+
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };
@@ -223,136 +263,176 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-  container: {
-    width: "90%",
-    maxHeight: "90%",
-    backgroundColor: "#fff",
-    borderRadius: 12,
+    backgroundColor: COLORS.overlay,
     padding: 20,
   },
+  container: {
+    width: "100%",
+    maxWidth: 340,
+    backgroundColor: COLORS.modalBg,
+    borderRadius: 20,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 10,
+  },
   heading: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 16,
+    marginBottom: 24,
+    color: COLORS.text,
   },
   
   searchContainer: {
-    zIndex: 10,
+    zIndex: 20, 
     marginBottom: 16,
+    position: 'relative',
+  },
+  inputWrapper: {
+      position: 'relative',
+      justifyContent: 'center',
   },
   searchInput: {
+    backgroundColor: COLORS.inputBg,
+    color: COLORS.text,
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 10,
-    zIndex: 11, 
+    borderColor: 'transparent',
+    borderRadius: 12,
+    padding: 14,
+    paddingRight: 40, 
+    fontSize: 16,
   },
   searchInputSelected: {
-    backgroundColor: '#f0f0f0', 
-    fontWeight: 'bold',
-    paddingRight: 40, 
+    borderColor: COLORS.primary,
+    fontWeight: '600',
   },
-  
+  inputIcon: {
+      position: 'absolute',
+      right: 12,
+  },
   clearButton: {
     position: 'absolute',
-    right: 5,
-    top: 5,
-    height: 40,
-    width: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 12,
-  },
-  clearButtonText: {
-    fontSize: 18,
-    color: '#888',
-    fontWeight: 'bold',
+    right: 10,
+    top: 12,
+    zIndex: 22,
   },
 
-  absoluteList: {
-    position: 'absolute', 
-    top: 50, 
+  dropdownContainer: {
+    position: 'absolute',
+    top: 55, 
     left: 0,
     right: 0,
-    maxHeight: 180, 
+    maxHeight: 200,
+    backgroundColor: '#252525', 
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#eee',
-    borderRadius: 8,
-    backgroundColor: '#fff',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    padding: 5,
+    borderColor: COLORS.border,
+    zIndex: 100, 
+    elevation: 10,
   },
-
+  absoluteList: {
+    flexGrow: 0,
+  },
   item: {
-    padding: 10,
-    borderRadius: 6,
-    marginVertical: 1, 
+    padding: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
   },
   itemText: {
     fontSize: 15,
+    color: COLORS.text,
   },
   noResults: {
     textAlign: "center",
-    color: "#888",
-    paddingVertical: 10, 
+    color: COLORS.textSecondary,
+    padding: 15,
+  },
+
+  formRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      gap: 12,
+      marginBottom: 12,
+  },
+  halfInput: {
+      flex: 1,
+  },
+  label: {
+      fontSize: 12,
+      color: COLORS.textSecondary,
+      marginBottom: 6,
+      marginLeft: 4,
   },
   input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 12,
+    backgroundColor: COLORS.inputBg,
+    color: COLORS.text,
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 16,
   },
+  
+  weightRow: {
+    flexDirection: "row",
+    alignItems: "flex-end", 
+    marginBottom: 30,
+    gap: 12,
+  },
+  switchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: COLORS.inputBg,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 12,
+    height: 56, 
+  },
+  switchLabel: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    marginHorizontal: 6,
+  },
+  switchLabelActive: {
+    color: COLORS.text,
+    fontWeight: "bold",
+  },
+
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 10, 
+    gap: 12,
   },
   cancelButton: {
     flex: 1,
-    backgroundColor: "#aaa",
-    padding: 12,
-    borderRadius: 8,
-    marginLeft: 8,
+    paddingVertical: 14,
+    borderRadius: 12,
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: '#444',
+  },
+  cancelButtonText: {
+    color: COLORS.textSecondary,
+    fontWeight: "600",
+    fontSize: 16,
   },
   saveButton: {
     flex: 1,
-    backgroundColor: "#1e90ff",
-    padding: 12,
-    borderRadius: 8,
-    marginRight: 8,
+    backgroundColor: COLORS.primary,
+    paddingVertical: 14,
+    borderRadius: 12,
     alignItems: "center",
   },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
+  saveButtonDisabled: {
+      backgroundColor: '#333',
+      opacity: 0.5,
   },
-  weightRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  marginBottom: 10,
-},
-switchContainer: {
-  flexDirection: "row",
-  alignItems: "center",
-  marginLeft: 10,
-},
-switchLabel: {
-  fontSize: 16,
-  color: "#888",
-  marginHorizontal: 4,
-},
-switchLabelActive: {
-  color: "#000",
-  fontWeight: "bold",
-},
-
+  saveButtonText: {
+    color: '#FFF',
+    fontWeight: "bold",
+    fontSize: 16,
+  },
 });

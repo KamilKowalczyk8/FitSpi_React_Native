@@ -6,17 +6,18 @@ import {
   Dimensions,
   Modal,
   Pressable,
+  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
+import { COLORS } from '@/constants/theme';
 import { useAuth } from "@/hooks/useAuth";
 import InvitationsModal from "./coach/InvitationsModal";
 import WorkoutInboxModal from "./coach/WorkoutInboxModal";
 import UserProfileModal from "./diet/UserProfileModal";
-
 
 const { width } = Dimensions.get("window");
 
@@ -25,7 +26,6 @@ export const SettingsDrawer: React.FC = () => {
   const [slideAnim] = useState(new Animated.Value(width));
   const [invitationsVisible, setInvitationsVisible] = useState(false);
   const [profileVisible, setProfileVisible] = useState(false);
-
   const [inboxVisible, setInboxVisible] = useState(false);
 
   const router = useRouter();
@@ -69,47 +69,77 @@ export const SettingsDrawer: React.FC = () => {
     setTimeout(() => setProfileVisible(true), 300);
   }
 
+  // Komponent pomocniczy dla pozycji w menu
+  const DrawerItem = ({ icon, label, onPress, isDestructive = false }: any) => (
+    <TouchableOpacity style={styles.optionButton} onPress={onPress}>
+      <Ionicons 
+        name={icon} 
+        size={24} 
+        color={isDestructive ? COLORS.danger : COLORS.iconColor} 
+        style={styles.icon}
+      />
+      <Text style={[styles.optionText, isDestructive && { color: COLORS.danger }]}>
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
+
   return (
     <View style={styles.container}>
+      {/* Przycisk otwierania (Zębatka) */}
       <TouchableOpacity onPress={toggleDrawer} style={styles.gearButton}>
-        <Ionicons name="settings-outline" size={28} color="#000" />
+        <Ionicons name="settings-outline" size={24} color="#FFF" />
       </TouchableOpacity>
 
-      <Modal transparent visible={visible} animationType="none">
+      <Modal transparent visible={visible} animationType="none" onRequestClose={toggleDrawer}>
         <Pressable style={styles.overlay} onPress={toggleDrawer} />
+        
         <Animated.View
           style={[styles.drawer, { transform: [{ translateX: slideAnim }] }]}
         >
-          <Text style={styles.drawerTitle}>Opcje</Text>
+          {/* Bezpieczny obszar dla notcha/wyspy */}
+          <SafeAreaView style={{flex: 1}}>
+            <View style={styles.drawerContent}>
+                
+                <Text style={styles.drawerTitle}>Menu</Text>
+                
+                <View style={styles.separator} />
 
-            <TouchableOpacity
-              style={styles.optionButton}
-              onPress={openInvitationsModal}
-            >
-              <Text style={styles.optionText}>📬 Zaproszenia</Text>
-            </TouchableOpacity>
+                <DrawerItem 
+                    icon="mail-unread-outline" 
+                    label="Zaproszenia" 
+                    onPress={openInvitationsModal} 
+                />
 
-            <TouchableOpacity 
-              style={styles.optionButton}
-              onPress={openInboxModal}
-            >
-              <Text style={styles.optionText}>💪 Treningi od trenera</Text>
-            </TouchableOpacity>
+                <DrawerItem 
+                    icon="download-outline" 
+                    label="Treningi od trenera" 
+                    onPress={openInboxModal} 
+                />
 
-            <TouchableOpacity 
-              style={styles.optionButton} 
-              onPress={openProfileModal}
-            >
-              <Text style={styles.optionText}>👤 Twój Profil</Text>
-            </TouchableOpacity>
+                <DrawerItem 
+                    icon="person-circle-outline" 
+                    label="Twój Profil" 
+                    onPress={openProfileModal} 
+                />
 
-            <TouchableOpacity style={styles.optionButton}>
-              <Text style={styles.optionText}>⚙️ Ustawienia</Text>
-            </TouchableOpacity>
+                <DrawerItem 
+                    icon="construct-outline" 
+                    label="Ustawienia" 
+                    onPress={() => {}} // Placeholder
+                />
 
-            <TouchableOpacity style={styles.optionButton} onPress={handleLogout}>
-              <Text style={styles.optionText}>🚪 Wyloguj się</Text>
-            </TouchableOpacity>
+                {/* Separator przed wylogowaniem */}
+                <View style={[styles.separator, { marginVertical: 20 }]} />
+
+                <DrawerItem 
+                    icon="log-out-outline" 
+                    label="Wyloguj się" 
+                    onPress={handleLogout} 
+                    isDestructive
+                />
+            </View>
+          </SafeAreaView>
         </Animated.View>
       </Modal>
 
@@ -133,43 +163,66 @@ export const SettingsDrawer: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    top: 39,
+    top: 55, 
     right: 20,
     zIndex: 100,
   },
   gearButton: {
-    backgroundColor: "#f0f0f0",
-    padding: 8,
-    borderRadius: 50,
+    backgroundColor: COLORS.buttonBg,
+    padding: 10,
+    borderRadius: 50, 
+    borderWidth: 1,
+    borderColor: '#444',
     elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
   },
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.3)",
+    backgroundColor: COLORS.overlay,
   },
   drawer: {
     position: "absolute",
     top: 0,
     right: 0,
-    width: width * 0.58,
+    width: width * 0.65, 
     height: "100%",
-    backgroundColor: "#fff",
-    padding: 20,
-    paddingTop: 60,
-    elevation: 8,
+    backgroundColor: COLORS.drawerBg,
+    elevation: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: -5, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 15,
+  },
+  drawerContent: {
+      paddingHorizontal: 25,
+      paddingTop: 40,
   },
   drawerTitle: {
-    fontSize: 22,
+    fontSize: 28,
     fontWeight: "bold",
-    marginBottom: 20,
+    color: COLORS.text,
+    marginBottom: 10,
+  },
+  separator: {
+      height: 1,
+      backgroundColor: COLORS.separator,
+      marginBottom: 10,
   },
   optionButton: {
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 18,
+  },
+  icon: {
+      marginRight: 15,
   },
   optionText: {
-    fontSize: 18,
+    fontSize: 16,
+    color: COLORS.text,
+    fontWeight: '500',
   },
 });
 

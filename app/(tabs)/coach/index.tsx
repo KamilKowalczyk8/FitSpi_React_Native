@@ -10,7 +10,7 @@ import { StyleSheet, Text, View } from 'react-native';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 50,
+    paddingTop: 60,
     backgroundColor: "#fff",
   },
   heading: {

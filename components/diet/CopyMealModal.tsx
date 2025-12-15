@@ -1,4 +1,5 @@
 import { getMealLabel } from '@/app/utils/mealHelper';
+import { COLORS } from '@/constants/theme'; // Import motywu
 import { MealType } from '@/models/Diet';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import React, { useState } from 'react';
@@ -21,33 +22,48 @@ export const CopyMealModal: React.FC<Props> = ({ visible, onClose, onConfirm, me
 
   if (!mealType) return null;
 
+  const formattedDate = date.toLocaleDateString("pl-PL", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric"
+  });
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.container}>
+          
           <Text style={styles.title}>Kopiuj {getMealLabel(mealType)}</Text>
-          <Text style={styles.subtitle}>Wybierz dzień docelowy:</Text>
+          <Text style={styles.subtitle}>Na dzień:</Text>
+          
+          <Text style={styles.dateDisplay}>{formattedDate}</Text>
 
-          {/* Wybór daty - prosty przykład z natywnym pickerem */}
           <View style={styles.pickerContainer}>
              <DateTimePicker
                 value={date}
                 mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                display={Platform.OS === 'ios' ? 'inline' : 'spinner'}
                 onChange={(event, selectedDate) => {
                     if (selectedDate) setDate(selectedDate);
                 }}
+                locale="pl-PL"
+                themeVariant="dark"
+                textColor={COLORS.text}
+                accentColor={COLORS.primary}
+                style={styles.datePicker}
              />
           </View>
 
           <View style={styles.buttonRow}>
-            <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
-              <Text style={styles.buttonText}>Kopiuj</Text>
-            </TouchableOpacity>
             <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-              <Text style={styles.buttonText}>Anuluj</Text>
+              <Text style={styles.cancelButtonText}>Anuluj</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
+              <Text style={styles.confirmButtonText}>Kopiuj</Text>
             </TouchableOpacity>
           </View>
+
         </View>
       </View>
     </Modal>
@@ -57,28 +73,85 @@ export const CopyMealModal: React.FC<Props> = ({ visible, onClose, onConfirm, me
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: COLORS.overlay, 
     justifyContent: 'center',
     alignItems: 'center',
   },
   container: {
-    width: '85%',
-    backgroundColor: '#fff',
+    width: '90%',
+    backgroundColor: COLORS.modalBg, 
+    borderRadius: 20,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    
+    // Cienie
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 10,
+  },
+  title: { 
+    fontSize: 20, 
+    fontWeight: 'bold', 
+    textAlign: 'center', 
+    marginBottom: 5,
+    color: COLORS.text // Biały tekst
+  },
+  subtitle: { 
+    fontSize: 14, 
+    color: COLORS.textSecondary, 
+    textAlign: 'center', 
+    marginBottom: 5 
+  },
+  dateDisplay: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: COLORS.primary, 
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  pickerContainer: { 
+    height: 40, 
+    justifyContent: 'center', 
+    marginBottom: 25,
+    overflow: 'hidden',
+  },
+  datePicker: {
+    height: 180,
+    backgroundColor: 'transparent',
+  },
+  buttonRow: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between',
+    gap: 15,
+  },
+  cancelButton: { 
+    paddingVertical: 12, 
+    flex: 1, 
+    alignItems: 'center',
     borderRadius: 12,
-    padding: 20,
-    elevation: 5,
+    borderWidth: 1,
+    borderColor: COLORS.danger, 
+    backgroundColor: 'transparent',
   },
-  title: { fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 5 },
-  subtitle: { fontSize: 14, color: '#666', textAlign: 'center', marginBottom: 20 },
-  pickerContainer: { height: 150, justifyContent: 'center', marginBottom: 20 },
-  buttonRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  cancelButton: { padding: 10, flex: 1, alignItems: 'center' },
+  cancelButtonText: {
+    fontWeight: '600', 
+    color: COLORS.text,
+    fontSize: 16,
+  },
   confirmButton: { 
-      padding: 10, 
-      flex: 1, 
-      alignItems: 'center', 
-      backgroundColor: '#007AFF', 
-      borderRadius: 8 
+    paddingVertical: 12, 
+    flex: 1, 
+    alignItems: 'center', 
+    backgroundColor: COLORS.primary, 
+    borderRadius: 12,
+    elevation: 2,
   },
-  buttonText: { fontWeight: '600', color: '#333' } 
+  confirmButtonText: { 
+    fontWeight: 'bold', 
+    color: '#fff', 
+    fontSize: 16,
+  } 
 });

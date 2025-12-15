@@ -1,3 +1,4 @@
+import { COLORS } from '@/constants/theme'; // Pamiętaj o imporcie
 import { ExerciseResponse } from "@/types/exercise.types";
 import React, { useState } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
@@ -36,7 +37,6 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({
             onEdit(item);
             setOpenMenuId(null);
           }}
-          
           exerciseId={item.id}
           onDeleted={() => {
             setExercises((currentExercises) =>
@@ -56,6 +56,7 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({
       keyExtractor={(item) => item.id.toString()}
       contentContainerStyle={styles.container}
       removeClippedSubviews={false}
+      style={{ backgroundColor: COLORS.background }}
     />
   );
 };
@@ -64,25 +65,29 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.background, 
+    flexGrow: 1,
   },
   exerciseBox: {
     marginBottom: 12,
-    paddingVertical: 10,
+    paddingVertical: 14, 
     paddingHorizontal: 15,
-    borderRadius: 10,
-    backgroundColor: "#F2F7FB",
+    borderRadius: 12,
+    backgroundColor: COLORS.cardBg, 
+    borderWidth: 1,
+    borderColor: COLORS.border,    
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.18,
-    shadowRadius: 1.0,
-    elevation: 1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 3,
   },
   activeExerciseBox: {
     zIndex: 1,
+    borderColor: COLORS.primary, 
   },
   infoContainer: {
     flex: 1,
@@ -92,11 +97,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     marginBottom: 4,
-    color: "#333",
+    color: COLORS.text, 
   },
   exerciseDetails: {
     fontSize: 14,
-    color: "#666",
+    color: COLORS.textSecondary, 
   },
 });
 

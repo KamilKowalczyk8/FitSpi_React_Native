@@ -1,5 +1,6 @@
 import { DietController } from '@/controllers/diet/diet.controller';
 import { useAuth } from '@/hooks/useAuth';
+import { useDisclosure } from '@/hooks/useDisclosure';
 import { DailyDietResponse, FoodLogItem, MealType } from '@/models/Diet';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert } from 'react-native';
@@ -16,10 +17,13 @@ export const useDiet = (selectedDate: Date) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const addModal = useDisclosure();
+  const copyModal = useDisclosure();
+  const [mealToCopy, setMealToCopy] = useState<MealType | null>(null);
+
   const fetchLogs = useCallback(async () => {
     if (!token) return;
     setLoading(true);
-    setError(null);
     try {
       const data = await DietController.getDailyData(token, selectedDate);
       setDailyData(data);
@@ -45,7 +49,7 @@ export const useDiet = (selectedDate: Date) => {
     }
   };
 
-  const copyMeal = async ({ targetDate, mealId }: CopyMealArgs) => {
+  const copyMealLogic = async ({ targetDate, mealId }: CopyMealArgs) => {
     if (!token) return;
     try {
         await DietController.copyMeal(token, {
@@ -63,8 +67,24 @@ export const useDiet = (selectedDate: Date) => {
     }
   };
 
+  const handleOpenCopy = (mealId: number) => {
+    setMealToCopy(mealId);
+    copyModal.open();
+  };
+
+  const handleCopyConfirm = (targetDate: Date) => {
+    if (mealToCopy) {
+      copyMealLogic({ targetDate, mealId: mealToCopy });
+      copyModal.close();
+    }
+  };
+
+  const handleFoodAdded = () => {
+    addModal.close();
+    fetchLogs();
+  };
+
   const foodLogs = dailyData?.foods || [];
-  
   const groupedMeals = useMemo(() => {
     const groups: Record<number, FoodLogItem[]> = {};
     foodLogs.forEach((item) => {
@@ -82,14 +102,23 @@ export const useDiet = (selectedDate: Date) => {
     foodLogs,
     targets: dailyData?.targets || emptyTargets,
     summary: dailyData?.summary || emptySummary,
-    
     groupedMeals,
-
     loading,
     error,
 
-    refresh: fetchLogs,
     deleteLog,
-    copyMeal
+    
+    modals: {
+        add: addModal,
+        copy: copyModal
+    },
+    state: {
+        mealToCopy
+    },
+    handlers: {
+        openCopy: handleOpenCopy,
+        confirmCopy: handleCopyConfirm,
+        foodAdded: handleFoodAdded
+    }
   };
 };

@@ -1,5 +1,7 @@
+import { COLORS } from "@/constants/theme";
 import { ExerciseController } from "@/controllers/workout/exercise.controller";
 import { AuthContext } from "@/providers/AuthProvider";
+import { Ionicons } from "@expo/vector-icons";
 import { useContext } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -7,8 +9,8 @@ type Props = {
   isOpen: boolean;
   onToggle: () => void;
   onEdit: () => void;
-  exerciseId: number;      
-  onDeleted: () => void;     
+  exerciseId: number;
+  onDeleted: () => void;
 };
 
 const ExerciseOptions = ({ isOpen, onToggle, onEdit, exerciseId, onDeleted }: Props) => {
@@ -19,30 +21,57 @@ const ExerciseOptions = ({ isOpen, onToggle, onEdit, exerciseId, onDeleted }: Pr
       Alert.alert("Błąd", "Brak tokenu – zaloguj się ponownie.");
       return;
     }
-    onToggle();
-
-    try {
-      await ExerciseController.deleteExercise(auth.token, exerciseId);
-      onDeleted();
-
-    } catch (err: any) {
-      console.error("Błąd przy usuwaniu ćwiczenia:", err);
-      Alert.alert("Błąd", err.message || "Wystąpił nieoczekiwany błąd.");
-    }
+    
+    Alert.alert(
+      "Usuń ćwiczenie",
+      "Czy na pewno chcesz usunąć to ćwiczenie?",
+      [
+        { text: "Anuluj", style: "cancel", onPress: () => onToggle() },
+        {
+          text: "Usuń",
+          style: "destructive",
+          onPress: async () => {
+            onToggle();
+            try {
+              await ExerciseController.deleteExercise(auth.token, exerciseId);
+              onDeleted();
+            } catch (err: any) {
+              console.error("Błąd przy usuwaniu ćwiczenia:", err);
+              Alert.alert("Błąd", err.message || "Wystąpił nieoczekiwany błąd.");
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.button} onPress={onToggle}>
-        <Text style={styles.buttonText}>⚙️</Text>
+      <TouchableOpacity 
+        style={styles.button} 
+        onPress={onToggle}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} 
+      >
+        <Ionicons 
+          name="ellipsis-vertical" 
+          size={20} 
+          color={COLORS.textSecondary} 
+        />
       </TouchableOpacity>
+
       {isOpen && (
         <View style={styles.dropdown}>
+          {/* Edytuj */}
           <TouchableOpacity style={styles.optionButton} onPress={onEdit}>
-            <Text style={styles.optionText}>✏️ Edytuj</Text>
+            <Ionicons name="create-outline" size={18} color={COLORS.text} style={styles.icon} />
+            <Text style={styles.optionText}>Edytuj</Text>
           </TouchableOpacity>
+          
+          <View style={styles.separator} />
+
           <TouchableOpacity style={styles.optionButton} onPress={handleDelete}>
-            <Text style={[styles.optionText, { color: "red" }]}>🗑️ Usuń</Text>
+            <Ionicons name="trash-outline" size={18} color={COLORS.danger} style={styles.icon} />
+            <Text style={[styles.optionText, { color: COLORS.danger }]}>Usuń</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -53,36 +82,47 @@ const ExerciseOptions = ({ isOpen, onToggle, onEdit, exerciseId, onDeleted }: Pr
 const styles = StyleSheet.create({
   container: {
     position: 'relative',
+    zIndex: 10, 
   },
   button: {
-    padding: 8,
-  },
-  buttonText: {
-    fontSize: 20,
+    padding: 4,
   },
   dropdown: {
     position: 'absolute',
-    top: 35,
+    top: 30,
     right: 0,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.cardBg, 
     borderRadius: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-    zIndex: 100,
-    minWidth: 120,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    paddingVertical: 4,
+    minWidth: 140,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 5,
+    elevation: 10,
+    zIndex: 20,
   },
   optionButton: {
-    paddingVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+  },
+  icon: {
+    marginRight: 10,
   },
   optionText: {
-    fontSize: 16,
-    textAlign: 'left',
+    fontSize: 14,
+    color: COLORS.text, 
+    fontWeight: '500',
   },
+  separator: {
+    height: 1,
+    backgroundColor: COLORS.border,
+    marginHorizontal: 8,
+  }
 });
 
 export default ExerciseOptions;

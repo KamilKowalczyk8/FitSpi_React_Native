@@ -2,6 +2,13 @@ import { addDays, format, isSameDay, startOfWeek } from "date-fns";
 import { pl } from "date-fns/locale";
 import React, { useEffect, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+const COLORS = {
+  background: '#121212',
+  cardBg: '#2C2C2C',
+  primary: '#2979FF', 
+  text: '#FFFFFF',
+  textSecondary: '#B0B0B0',
+};
 
 interface DateSliderProps {
   selectedDate: Date;
@@ -70,7 +77,6 @@ export const DateSlider: React.FC<DateSliderProps> = ({ selectedDate, onSelectDa
         })}
       </ScrollView>
 
-      {/* Strzałka w prawo */}
       <TouchableOpacity onPress={goToNextWeek} style={[styles.arrowButton, { right: 0 }]}>
         <Text style={styles.arrowText}>›</Text>
       </TouchableOpacity>
@@ -83,6 +89,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 10,
+    backgroundColor: COLORS.background, 
   },
   weekContainer: {
     flexDirection: "row",
@@ -96,28 +103,30 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     paddingVertical: 10,
     borderRadius: 12,
-    backgroundColor: "#E6F0FA",
+    backgroundColor: COLORS.cardBg, 
   },
   selectedDayBox: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: COLORS.primary, 
   },
   todayDayBox: {
-    backgroundColor: "#FFD54F",
+    backgroundColor: COLORS.cardBg, 
+    borderWidth: 1,                 
+    borderColor: COLORS.primary,    
   },
   dayNumber: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#333",
+    color: COLORS.text, 
   },
   weekDay: {
     fontSize: 14,
-    color: "#666",
+    color: COLORS.textSecondary, 
   },
   selectedText: {
-    color: "#fff",
+    color: '#FFFFFF', 
   },
   todayText: {
-    color: "#000",
+    color: COLORS.primary, 
     fontWeight: "bold",
   },
   arrowButton: {
@@ -129,7 +138,7 @@ const styles = StyleSheet.create({
   },
   arrowText: {
     fontSize: 40,
-    color: "#fff",
+    color: COLORS.primary, 
     fontWeight: "bold",
   },
 });

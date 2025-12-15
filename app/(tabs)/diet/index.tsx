@@ -6,8 +6,8 @@ import { CopyMealModal } from '@/components/diet/CopyMealModal';
 import { DietSummary } from '@/components/diet/DietSummary';
 import { MealSection } from '@/components/diet/MealSection';
 import { DateSlider } from '@/components/workout/DateSlider';
+import { COLORS } from '@/constants/theme'; // Import motywu
 import { useDiet } from '@/hooks/diet/useDiet';
-import { useDisclosure } from '@/hooks/useDisclosure'; // <--- NOWY HOOK
 import { MealType } from '@/models/Diet';
 import { useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -23,46 +23,21 @@ const MEAL_ORDER = [
 
 const DietScreen = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  
-  // 1. Logika biznesowa z hooka useDiet
   const { 
-    foodLogs, 
-    groupedMeals, // Gotowe grupy!
+    groupedMeals, 
     targets, 
     summary, 
     loading, 
-    deleteLog, 
-    refresh, 
-    copyMeal // Gotowa funkcja kopiująca
+    deleteLog,
+    modals,   
+    handlers,  
+    state      
   } = useDiet(selectedDate);
-
-  // 2. Obsługa Modali przy pomocy useDisclosure
-  const addModal = useDisclosure();
-  const copyModal = useDisclosure();
-  
-  const [mealToCopy, setMealToCopy] = useState<MealType | null>(null);
-
-  // Handlery
-  const handleOpenCopy = (mealId: number) => {
-    setMealToCopy(mealId);
-    copyModal.open();
-  };
-
-  const handleCopyConfirm = (targetDate: Date) => {
-    if (mealToCopy) {
-      copyMeal({ targetDate, mealId: mealToCopy });
-      copyModal.close();
-    }
-  };
-
-  const handleFoodAdded = () => {
-    addModal.close();
-    refresh();
-  };
 
   return (
     <View style={styles.container}>
       <SettingsDrawer />  
+      
       <Text style={styles.heading}>Twoja dieta</Text> 
       
       <View style={styles.dateContainer}>
@@ -74,34 +49,29 @@ const DietScreen = () => {
 
       <View style={styles.contentContainer}>
         {loading ? (
-            <ActivityIndicator size="large" color="#34C759" style={{ marginTop: 20 }} />
+            <ActivityIndicator size="large" color={COLORS.primary} style={{ marginTop: 20 }} />
         ) : (
             <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-                {foodLogs.length === 0 ? (
-                    <Text style={styles.placeholderText}>Brak posiłków w tym dniu.</Text>
-                ) : (
-                    MEAL_ORDER.map((mealId) => {
-                        const items = groupedMeals[mealId] || []; // Pobieramy z hooka
-                        if (items.length === 0) return null;
-
-                        return (
-                            <MealSection
-                                key={mealId}
-                                title={getMealLabel(mealId)}
-                                color={getMealColor(mealId)}
-                                items={items}
-                                onDelete={deleteLog}
-                                onCopy={() => handleOpenCopy(mealId)}
-                            />
-                        );
-                    })
-                )}
+                {MEAL_ORDER.map((mealId) => {
+                    const items = groupedMeals[mealId] || []; 
+                    if (items.length === 0) return null;
+                    return (
+                        <MealSection
+                            key={mealId}
+                            title={getMealLabel(mealId)}
+                            color={getMealColor(mealId)} 
+                            items={items}
+                            onDelete={deleteLog}
+                            onCopy={() => handlers.openCopy(mealId)}
+                        />
+                    );
+                })}
                 
-                <AddFoodButton onPress={addModal.open} />
+                <AddFoodButton onPress={modals.add.open} />
             </ScrollView>
         )}
       </View>
-
+      
       {summary && targets && (
           <DietSummary 
             consumed={{
@@ -118,21 +88,20 @@ const DietScreen = () => {
             }}
           />
       )}
-
+      
       <AddFoodModal 
-        visible={addModal.isOpen} 
-        onClose={addModal.close}
+        visible={modals.add.isOpen} 
+        onClose={modals.add.close}
         date={selectedDate}
-        onAdded={handleFoodAdded}
+        onAdded={handlers.foodAdded}
       />
-
+      
       <CopyMealModal 
-        visible={copyModal.isOpen}
-        onClose={copyModal.close}
-        onConfirm={handleCopyConfirm}
-        mealType={mealToCopy}
+        visible={modals.copy.isOpen} 
+        onClose={modals.copy.close}
+        onConfirm={handlers.confirmCopy}
+        mealType={state.mealToCopy}
       />
-
     </View>
   );
 };
@@ -140,29 +109,25 @@ const DietScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 50,
-    backgroundColor: "#fff",
+    paddingTop: 60,
+    backgroundColor: COLORS.background, 
   },
   heading: {
-    fontSize: 22,
-    fontWeight: "bold",
+    fontSize: 28,
+    fontWeight: "800",
     textAlign: "center",
-    marginBottom: 10,
+    marginBottom: 15,
+    color: COLORS.text, 
+    letterSpacing: 0.5,
   },
   dateContainer: {
     paddingBottom: 10,
-    backgroundColor: "#7fff00",
+    backgroundColor: COLORS.background, 
   },
   contentContainer: {
     flex: 1,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: COLORS.background, 
     paddingTop: 10,
-  },
-  placeholderText: {
-    fontSize: 16,
-    color: "#666",
-    textAlign: "center",
-    marginTop: 20,
   },
 });
 

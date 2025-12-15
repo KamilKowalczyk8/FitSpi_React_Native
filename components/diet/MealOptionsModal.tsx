@@ -1,11 +1,13 @@
+import { COLORS } from '@/constants/theme';
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
-    Modal,
-    Pressable,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 interface Props {
@@ -29,23 +31,30 @@ export const MealOptionsModal: React.FC<Props> = ({
       onRequestClose={onClose}
     >
       <Pressable style={styles.modalOverlay} onPress={onClose}>
-        <View style={styles.menuContainer}>
-          <Text style={styles.menuHeader}>{title}</Text>
+        
+        <Pressable style={styles.menuContainer} onPress={(e) => e.stopPropagation()}>
           
-          {/* Opcja 1: Kopiuj */}
+          <Text style={styles.menuHeader}>{title}</Text>
+          <View style={styles.separator} />
+          
           <TouchableOpacity 
             style={styles.menuItem} 
             onPress={() => {
               onClose(); 
               onCopy();  
             }}
+            activeOpacity={0.7}
           >
-            <Text style={styles.menuIcon}>📋</Text>
+            <Ionicons 
+              name="copy-outline" 
+              size={22} 
+              color={COLORS.text} 
+              style={styles.menuIcon} 
+            />
             <Text style={styles.menuText}>Kopiuj na inny dzień</Text>
           </TouchableOpacity>
 
-          {/* Tu w przyszłości dodasz "Usuń", "Edytuj" itp. */}
-        </View>
+        </Pressable>
       </Pressable>
     </Modal>
   );
@@ -54,42 +63,50 @@ export const MealOptionsModal: React.FC<Props> = ({
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: COLORS.overlay, 
     justifyContent: 'center',
     alignItems: 'center',
   },
   menuContainer: {
-    width: '70%',
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 20,
+    width: '80%',
+    backgroundColor: COLORS.modalBg, 
+    borderRadius: 16,
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     elevation: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
   },
   menuHeader: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#666',
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.textSecondary, 
     marginBottom: 15,
     textAlign: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-    paddingBottom: 10,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: COLORS.border,
+    marginBottom: 10,
+    marginHorizontal: 10,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
+    paddingHorizontal: 15,
+    borderRadius: 8,
   },
   menuIcon: {
-    fontSize: 18,
-    marginRight: 12,
+    marginRight: 15,
   },
   menuText: {
     fontSize: 16,
-    color: '#333',
+    color: COLORS.text, 
+    fontWeight: '500',
   },
 });

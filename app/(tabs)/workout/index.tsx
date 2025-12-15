@@ -12,9 +12,19 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWorkoutCopy } from "@/hooks/useWorkoutCopy";
 import { Workout } from "@/models/Workout";
 import { ExerciseResponse } from "@/types/exercise.types";
+import { Ionicons } from '@expo/vector-icons';
 import { isSameDay } from "date-fns";
 import { useEffect, useState } from "react";
 import { Alert, DeviceEventEmitter, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+const COLORS = {
+  background: '#121212',
+  cardBg: '#1E1E1E',
+  primary: '#2979FF', 
+  text: '#FFFFFF',
+  textSecondary: '#B0B0B0',
+  success: '#00C853', 
+};
 
 const WorkoutScreen = () => {
   const { user, token } = useAuth();
@@ -36,26 +46,20 @@ const WorkoutScreen = () => {
     if (!token) return;
     try {
       const data = await WorkoutController.getWorkouts(token) as Workout[];
-      
       const acceptedWorkouts = data.filter((w) => w.status === 'accepted');
       setWorkouts(acceptedWorkouts);
-      
     } catch (error) {
       console.error(error);
       Alert.alert("Błąd", "Nie udało się pobrać treningów");
     }
   };
+
   useEffect(() => {
     fetchWorkouts();
-
     const subscription = DeviceEventEmitter.addListener('event.refreshWorkouts', () => {
-      console.log("♻️ Odebrano sygnał odświeżenia - pobieram treningi...");
       fetchWorkouts();
     });
-
-    return () => {
-      subscription.remove();
-    };
+    return () => subscription.remove();
   }, [token]);
 
   useEffect(() => {
@@ -90,7 +94,6 @@ const WorkoutScreen = () => {
       Alert.alert("Błąd", "Brak wybranego treningu.");
       return;
     }
-
     try {
       if (editingExercise) {
         const body = {
@@ -104,11 +107,9 @@ const WorkoutScreen = () => {
           editingExercise.id,
           body
         );
-
         setExercises((prev) =>
           prev.map((ex) => (ex.id === editingExercise.id ? updatedExercise : ex))
         );
-        Alert.alert("Sukces", "Ćwiczenie zaktualizowane");
       } else {
         const body = {
           templateId: exerciseData.templateId,
@@ -122,7 +123,6 @@ const WorkoutScreen = () => {
         setExercises((prev) => [...prev, savedExercise]);
       }
     } catch (error: any) {
-      console.error("Błąd przy zapisywaniu ćwiczenia:", error);
       Alert.alert("Błąd", error.message || "Nie udało się zapisać ćwiczenia");
     } finally {
       setExerciseModalVisible(false);
@@ -139,7 +139,7 @@ const WorkoutScreen = () => {
     if (!token || !selectedWorkout) return;
     Alert.alert(
       "Potwierdź usunięcie",
-      "Czy na pewno chcesz usunąć ten trening i wszystkie jego ćwiczenia?",
+      "Czy na pewno chcesz usunąć ten trening?",
       [
         { text: "Anuluj", style: "cancel" },
         {
@@ -148,13 +148,9 @@ const WorkoutScreen = () => {
           onPress: async () => {
             try {
               await WorkoutController.deleteWorkout(token, selectedWorkout.id);
-              setWorkouts((prev) =>
-                prev.filter((w) => w.id !== selectedWorkout.id)
-              );
+              setWorkouts((prev) => prev.filter((w) => w.id !== selectedWorkout.id));
               setSelectedWorkout(null);
-              Alert.alert("Sukces", "Trening został usunięty");
             } catch (error) {
-              console.error(error);
               Alert.alert("Błąd", "Nie udało się usunąć treningu");
             }
           },
@@ -182,9 +178,7 @@ const WorkoutScreen = () => {
   const handleConfirmCopy = async (targetDate: Date) => {
     if (isCopying || !selectedWorkout) return;
     setCopyModalVisible(false);
-
     const newWorkout = await copyWorkout(selectedWorkout, exercises, targetDate);
-
     if (newWorkout) {
       setWorkouts((prev) => [...prev, newWorkout]);
       setSelectedDate(targetDate);
@@ -202,10 +196,10 @@ const WorkoutScreen = () => {
       </View>
 
       {selectedWorkout ? (
-        <>
+        <View style={{ flex: 1 }}>
           <View style={styles.titleSection}>
             <View style={styles.titleAbsolute}>
-              <WorkoutTitle title={selectedWorkout.description || ""} />
+              <WorkoutTitle title={selectedWorkout.description || ""} color={COLORS.text} />
             </View>
             <WorkoutOptions
               onDeleteWorkout={handleDeleteWorkout}
@@ -214,7 +208,7 @@ const WorkoutScreen = () => {
             />
           </View>
 
-          <View style={{ flex: 1, marginTop: 10 }}>
+          <View style={{ flex: 1, marginTop: 1 }}>
             <ExerciseList
               exercises={exercises}
               setExercises={setExercises}
@@ -226,8 +220,10 @@ const WorkoutScreen = () => {
             <TouchableOpacity
               onPress={() => setExerciseModalVisible(true)}
               style={styles.addExerciseButton}
+              activeOpacity={0.8}
             >
-              <Text style={styles.addExerciseText}>➕ Dodaj ćwiczenie</Text>
+              <Ionicons name="add-circle-outline" size={24} color="#FFF" style={{ marginRight: 8 }} />
+              <Text style={styles.addExerciseText}>Dodaj ćwiczenie</Text>
             </TouchableOpacity>
 
             <ExerciseAdd
@@ -240,11 +236,24 @@ const WorkoutScreen = () => {
               initialData={editingExercise}
             />
           </View>
-        </>
+        </View>
       ) : (
-        <View style={styles.addSection}>
-          <TouchableOpacity onPress={openCreateModal} style={styles.createButton}>
-            <Text style={{ color: "#fff", fontSize: 18 }}>➕ Stwórz trening</Text>
+        <View style={styles.emptyStateContainer}>
+          <View style={styles.emptyStateIconBg}>
+            <Ionicons name="barbell-outline" size={60} color={COLORS.primary} />
+          </View>
+          <Text style={styles.emptyStateTitle}>Dzień wolny?</Text>
+          <Text style={styles.emptyStateSubtitle}>
+            Nie masz zaplanowanego treningu na ten dzień.
+          </Text>
+
+          <TouchableOpacity 
+            onPress={openCreateModal} 
+            style={styles.createWorkoutButton}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="add" size={24} color="#FFF" />
+            <Text style={styles.createWorkoutButtonText}>Stwórz trening</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -291,26 +300,29 @@ const WorkoutScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 50,
-    backgroundColor: "#fff",
+    paddingTop: 60, 
+    backgroundColor: COLORS.background, 
   },
   containerdate: {
     paddingBottom: 10,
-    backgroundColor: "#7fff00",
   },
   heading: {
-    fontSize: 22,
-    fontWeight: "bold",
+    fontSize: 28,
+    fontWeight: "800",
     textAlign: "center",
-    marginBottom: 10,
+    marginBottom: 15,
+    color: COLORS.text, 
+    letterSpacing: 0.5,
   },
   titleSection: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-end",
     paddingHorizontal: 15,
-    paddingVertical: 10,
-    backgroundColor: "#f0f0f0",
+    paddingVertical: 13,
+    backgroundColor: COLORS.cardBg, 
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
     position: "relative",
   },
   titleAbsolute: {
@@ -319,36 +331,82 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: "center",
   },
-  addSection: {
+  
+  emptyStateContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#2d1e83ff",
-    width: "100%",
-  },
-  createButton: {
-    backgroundColor: "#1e90ff",
-    paddingVertical: 15,
     paddingHorizontal: 30,
-    borderRadius: 12,
+    paddingBottom: 50,
   },
-  exerciseAddSection: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-    marginTop: 20,
+  emptyStateIconBg: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#1E2A38', 
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  emptyStateTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+  emptyStateSubtitle: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    marginBottom: 30,
+    lineHeight: 20,
+  },
+  createWorkoutButton: {
+    flexDirection: 'row',
+    backgroundColor: COLORS.primary, 
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderRadius: 30, 
     alignItems: "center",
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  createWorkoutButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginLeft: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+
+ 
+  exerciseAddSection: {
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+    paddingTop: 10,
+    alignItems: "center",
+    backgroundColor: COLORS.background,
   },
   addExerciseButton: {
-    backgroundColor: "#32CD32",
+    flexDirection: 'row',
+    backgroundColor: COLORS.cardBg, 
+    borderWidth: 1,
+    borderColor: COLORS.primary, 
     paddingVertical: 16,
-    borderRadius: 12,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
   },
   addExerciseText: {
-    color: "#fff",
-    fontSize: 18,
+    color: COLORS.primary, 
+    fontSize: 16,
     fontWeight: "bold",
   },
 });

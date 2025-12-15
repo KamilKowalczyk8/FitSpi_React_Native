@@ -5,31 +5,20 @@ import { useCallback, useState } from 'react';
 
 export function useCoachController() {
   const { token } = useAuth();
-
-  // Stan dla modalu zapraszania
-  const [isModalVisible, setIsModalVisible] = useState(false);
   
-  // Stan dla listy klientów
   const [clients, setClients] = useState<ClientResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // --- NOWY STAN DLA MODALA PRZEGLĄDANIA ---
   const [selectedClient, setSelectedClient] = useState<ClientResponse | null>(null);
+  
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [isBrowseModalVisible, setBrowseModalVisible] = useState(false);
-  // --- KONIEC NOWEGO STANU ---
-
-
-  // NOWY STAN – MODAL TWORZENIA TRENINGU
   const [isCreateModalVisible, setCreateModalVisible] = useState(false);
 
   const openCreateWorkoutModal = () => setCreateModalVisible(true);
   const closeCreateWorkoutModal = () => setCreateModalVisible(false);
-
   const openModal = () => setIsModalVisible(true);
   const closeModal = () => setIsModalVisible(false);
-
-
 
   const fetchClients = useCallback(async () => {
     if (!token) return;
@@ -51,7 +40,6 @@ export function useCoachController() {
     }, [fetchClients])
   );
 
-  // --- NOWE FUNKCJE OBSŁUGI ---
   const openBrowseModal = (client: ClientResponse) => {
     setSelectedClient(client);
     setBrowseModalVisible(true);
@@ -61,7 +49,6 @@ export function useCoachController() {
     setSelectedClient(null);
     setBrowseModalVisible(false);
   };
-  // --- KONIEC NOWYCH FUNKCJI ---
 
   return {
     clients,

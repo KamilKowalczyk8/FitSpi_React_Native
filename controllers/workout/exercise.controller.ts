@@ -11,9 +11,11 @@ import { ExerciseResponse } from "@/types/exercise.types";
 export const ExerciseController = {
   getExercises: async (token: string): Promise<ExerciseResponse[]> => {
     const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
     const response = await fetch(`${API_URL}/exercises`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+
     const result = await response.json();
     console.log("📥 API /exercise returned:", result);
     if (!response.ok) throw new Error(result.message || "Nie udało się pobrać ćwiczeń");
@@ -40,7 +42,9 @@ export const ExerciseController = {
     const API_URL = process.env.EXPO_PUBLIC_API_URL;
     const response = await fetch(`${API_URL}/exercises/${id}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      headers:
+       { "Content-Type": "application/json",
+         Authorization: `Bearer ${token}` },
       body: JSON.stringify(body),
     });
     const result = await response.json();

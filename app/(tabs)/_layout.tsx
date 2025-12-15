@@ -1,51 +1,80 @@
+import { Ionicons } from '@expo/vector-icons'; // Importujemy standardowe ikony Expo
 import { Tabs } from 'expo-router';
-import { Platform, Text } from 'react-native';
+import { Platform } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+
+// Kolory naszego motywu Blue Active
+const COLORS = {
+  tabBarBg: '#1E1E1E',   // Nieco jaśniejsze tło dla paska nawigacji
+  primary: '#2979FF',    // Neonowy Błękit (Aktywny)
+  inactive: '#757575',   // Szary (Nieaktywny)
+  border: '#2C2C2C',     // Kolor górnej krawędzi paska
+};
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
+  
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+      
+        tabBarActiveTintColor: COLORS.primary,
+        tabBarInactiveTintColor: COLORS.inactive,
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
+        
+     
         tabBarStyle: Platform.select({
           ios: {
-            position: 'absolute',
+            position: 'absolute', 
+            backgroundColor: COLORS.tabBarBg, 
+            borderTopColor: COLORS.border,
           },
-          default: {},
+          default: {
+            backgroundColor: COLORS.tabBarBg,
+            borderTopColor: COLORS.border,
+            borderTopWidth: 1,
+            height: 108,
+            paddingBottom: 8,
+            paddingTop: 8,
+          },
         }),
+    
+        tabBarLabelStyle: {
+            fontSize: 12,
+            fontWeight: '600',
+        }
       }}
     >
       <Tabs.Screen
         name="workout/index"
         options={{
           title: 'Treningi',
-          tabBarIcon: ({ color }: { color: string }) => (
-            <Text style={{ color, fontSize: 24 }}>💪</Text>
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons size={28} name={focused ? 'barbell' : 'barbell-outline'} color={color} />
           ),
         }}
       />
+      
       <Tabs.Screen
         name="diet/index"
         options={{
           title: 'Dieta',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="figure.walk" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons size={28} name={focused ? 'nutrition' : 'nutrition-outline'} color={color} />
+          ),
         }}
       />
+      
       <Tabs.Screen
         name="coach/index"
         options={{
           title: 'Podopieczni',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="figure.walk" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons size={28} name={focused ? 'people' : 'people-outline'} color={color} />
+          ),
         }}
       />
     </Tabs>

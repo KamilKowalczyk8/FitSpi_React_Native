@@ -1,6 +1,7 @@
+import { COLORS } from '@/constants/theme'; // Import motywu
 import { ClientResponse } from '@/controllers/coach/clientLink.controller';
 import React from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 import ClientTile from './ClientTile';
 
 interface ClientListProps {
@@ -13,15 +14,27 @@ interface ClientListProps {
 const ClientList: React.FC<ClientListProps> = ({ clients, isLoading, error, onBrowseWorkouts }) => {
 
   if (isLoading) {
-    return <ActivityIndicator size="large" color="#1e90ff" style={styles.centered} />;
+    return (
+        <View style={styles.centerContainer}>
+            <ActivityIndicator size="large" color={COLORS.primary} />
+        </View>
+    );
   }
 
   if (error) {
-    return <Text style={[styles.centered, styles.errorText]}>{error}</Text>;
+    return (
+        <View style={styles.centerContainer}>
+            <Text style={styles.errorText}>{error}</Text>
+        </View>
+    );
   }
 
   if (clients.length === 0) {
-    return <Text style={styles.centered}>Nie masz jeszcze żadnych podopiecznych.</Text>;
+    return (
+        <View style={styles.centerContainer}>
+            <Text style={styles.emptyText}>Nie masz jeszcze żadnych podopiecznych.</Text>
+        </View>
+    );
   }
 
   return (
@@ -42,16 +55,23 @@ const ClientList: React.FC<ClientListProps> = ({ clients, isLoading, error, onBr
 const styles = StyleSheet.create({
   listContainer: {
     paddingHorizontal: 16,
+    paddingBottom: 20,
   },
-  centered: {
+  centerContainer: {
     flex: 1,
-    textAlign: 'center',
-    marginTop: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  emptyText: {
     fontSize: 16,
-    color: '#666',
+    color: COLORS.textSecondary, 
+    textAlign: 'center',
   },
   errorText: {
-    color: 'red',
+    fontSize: 16,
+    color: COLORS.danger, 
+    textAlign: 'center',
   }
 });
 
