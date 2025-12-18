@@ -4,8 +4,9 @@
     "slug": "FitSpiReact",
     "version": "1.0.0",
     "orientation": "portrait",
+    "backgroundColor": "#ffffff",
     "scheme": "fitspireact",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
@@ -28,7 +29,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/logoFitSpipng",
+          "image": "./assets/images/logoFitSpi.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"

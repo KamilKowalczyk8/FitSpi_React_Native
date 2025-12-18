@@ -21,6 +21,7 @@ import UserProfileModal from "./diet/UserProfileModal";
 
 const { width } = Dimensions.get("window");
 
+
 export const SettingsDrawer: React.FC = () => {
   const [visible, setVisible] = useState(false);
   const [slideAnim] = useState(new Animated.Value(width));

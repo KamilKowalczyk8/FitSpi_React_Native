@@ -1,186 +1,260 @@
 import { CopyWorkoutModal } from '@/components/workout/view/CopyWorkoutModal';
+import { COLORS } from '@/constants/theme'; // Import motywu
 import { PendingWorkout, useWorkoutInbox } from '@/hooks/useWorkoutInbox';
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    Modal,
-    Pressable,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 interface Props {
-  visible: boolean;
-  onClose: () => void;
+    visible: boolean;
+    onClose: () => void;
 }
 
 const WorkoutInboxModal: React.FC<Props> = ({ visible, onClose }) => {
-  const {
-    workouts,
-    loading,
-    actionLoading,
-    isModalVisible,
-    openAcceptModal,
-    closeAcceptModal,
-    handleConfirmAccept,
-    handleReject, 
-  } = useWorkoutInbox(visible);
+    const {
+        workouts,
+        loading,
+        actionLoading,
+        isModalVisible,
+        openAcceptModal,
+        closeAcceptModal,
+        handleConfirmAccept,
+        handleReject, 
+    } = useWorkoutInbox(visible);
 
-  const confirmReject = (id: number) => {
-    Alert.alert(
-      "Odrzuć trening",
-      "Czy na pewno chcesz odrzucić tę propozycję?",
-      [
-        { text: "Anuluj", style: "cancel" },
-        { text: "Odrzuć", style: "destructive", onPress: () => handleReject(id) }
-      ]
-    );
-  };
-
-  return (
-    <>
-      <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-        <Pressable style={styles.overlay} onPress={onClose}>
-          <Pressable style={styles.container} onPress={() => {}}>
-            
-            <View style={styles.header}>
-              <Text style={styles.title}>📬 Oczekujące treningi</Text>
-              <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-                <Text style={styles.closeText}>✕</Text>
-              </TouchableOpacity>
-            </View>
-
-            {loading ? (
-              <ActivityIndicator size="large" color="#34C759" style={{ marginTop: 20 }} />
-            ) : (
-              <FlatList<PendingWorkout>
-                data={workouts}
-                keyExtractor={(item) => item.id.toString()}
-                ListEmptyComponent={
-                  <Text style={styles.emptyText}>Brak nowych treningów od trenera.</Text>
+    const confirmReject = (id: number) => {
+        Alert.alert(
+            "Odrzuć trening",
+            "Czy na pewno chcesz odrzucić tę propozycję?",
+            [
+                { text: "Anuluj", style: "cancel" },
+                { 
+                    text: "Odrzuć", 
+                    style: "destructive", 
+                    onPress: () => handleReject(id) 
                 }
-                renderItem={({ item }) => (
-                  <View style={styles.row}>
-                    <View style={styles.info}>
-                      <Text style={styles.workoutName}>{item.description}</Text>
-                      <Text style={styles.subText}>
-                        Utworzono: {new Date(item.created_at).toLocaleDateString()}
-                      </Text>
-                    </View>
+            ]
+        );
+    };
 
-                    <View style={styles.actions}>
-                        {/* Przycisk AKCEPTUJ */}
-                        <TouchableOpacity
-                          style={styles.acceptBtn}
-                          onPress={() => openAcceptModal(item.id)}
-                          disabled={actionLoading === item.id}
-                        >
-                          {actionLoading === item.id ? (
-                            <ActivityIndicator color="#fff" size="small" />
-                          ) : (
-                            <Text style={styles.acceptText}>Akceptuj</Text>
-                          )}
-                        </TouchableOpacity>
+    return (
+        <>
+            <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+                <Pressable style={styles.overlay} onPress={onClose}>
+                    <Pressable style={styles.container} onPress={() => {}}>
+                        
+                        {/* Header */}
+                        <View style={styles.header}>
+                            <View style={styles.headerTitleRow}>
+                                <Ionicons name="mail-unread-outline" size={24} color={COLORS.primary} style={{marginRight: 10}} />
+                                <Text style={styles.title}>Oczekujące treningi</Text>
+                            </View>
+                            <TouchableOpacity onPress={onClose} style={styles.closeBtn} hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+                                <Ionicons name="close" size={24} color={COLORS.textSecondary} />
+                            </TouchableOpacity>
+                        </View>
 
-                         {/* Przycisk ODRZUĆ */}
-                        <TouchableOpacity
-                          style={styles.rejectBtn}
-                          onPress={() => confirmReject(item.id)}
-                          disabled={actionLoading === item.id}
-                        >
-                          <Text style={styles.rejectText}>✕</Text>
-                        </TouchableOpacity>
-                    </View>
-                  </View>
-                )}
-              />
-            )}
-          </Pressable>
-        </Pressable>
-      </Modal>
+                        {/* Content */}
+                        {loading ? (
+                            <View style={styles.centerContent}>
+                                <ActivityIndicator size="large" color={COLORS.primary} />
+                            </View>
+                        ) : (
+                            <FlatList<PendingWorkout>
+                                data={workouts}
+                                keyExtractor={(item) => item.id.toString()}
+                                contentContainerStyle={styles.listContent}
+                                ListEmptyComponent={
+                                    <View style={styles.centerContent}>
+                                        <Ionicons name="checkmark-done-circle-outline" size={50} color={COLORS.textPlaceholder} />
+                                        <Text style={styles.emptyText}>Brak nowych treningów od trenera.</Text>
+                                    </View>
+                                }
+                                renderItem={({ item }) => (
+                                    <View style={styles.card}>
+                                        <View style={styles.info}>
+                                            <Text style={styles.workoutName}>{item.description}</Text>
+                                            <View style={styles.metaRow}>
+                                                <Ionicons name="calendar-outline" size={14} color={COLORS.textSecondary} style={{marginRight: 5}} />
+                                                <Text style={styles.subText}>
+                                                    Otrzymano: {new Date(item.created_at).toLocaleDateString()}
+                                                </Text>
+                                            </View>
+                                        </View>
 
-      <CopyWorkoutModal
-        isVisible={isModalVisible}
-        onClose={closeAcceptModal}
-        onConfirm={handleConfirmAccept} 
-        title="Zaplanuj ten trening na:"
-        confirmText="Zatwierdź"
-      />
-    </>
-  );
+                                        <View style={styles.actions}>
+                                            
+
+                                            <TouchableOpacity
+                                                style={styles.acceptBtn}
+                                                onPress={() => openAcceptModal(item.id)}
+                                                disabled={actionLoading === item.id}
+                                                activeOpacity={0.7}
+                                            >
+                                                {actionLoading === item.id ? (
+                                                    <ActivityIndicator color="#fff" size="small" />
+                                                ) : (
+                                                    <>
+                                                        <Ionicons name="download-outline" size={18} color="#fff" style={{marginRight: 6}} />
+                                                        <Text style={styles.acceptText}>Pobierz</Text>
+                                                    </>
+                                                )}
+                                            </TouchableOpacity>
+
+                                            <TouchableOpacity
+                                                style={styles.rejectBtn}
+                                                onPress={() => confirmReject(item.id)}
+                                                disabled={actionLoading === item.id}
+                                                activeOpacity={0.7}
+                                            >
+                                                <Ionicons name="trash-outline" size={20} color={COLORS.danger} />
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                )}
+                            />
+                        )}
+                    </Pressable>
+                </Pressable>
+            </Modal>
+
+            <CopyWorkoutModal
+                isVisible={isModalVisible}
+                onClose={closeAcceptModal}
+                onConfirm={handleConfirmAccept} 
+                title="Zaplanuj ten trening na:"
+                confirmText="Zatwierdź"
+            />
+        </>
+    );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  container: {
-    width: '90%',
-    height: '70%',
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 20,
-    elevation: 5,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
-    borderBottomWidth: 1,
-    borderColor: '#eee',
-    paddingBottom: 10,
-  },
-  title: { fontSize: 20, fontWeight: 'bold' },
-  closeBtn: { padding: 5 },
-  closeText: { fontSize: 20, color: '#666' },
-  emptyText: { textAlign: 'center', marginTop: 50, color: '#888', fontSize: 16 },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderColor: '#f0f0f0',
-  },
-  info: { flex: 1 },
-  workoutName: { fontSize: 16, fontWeight: '600', marginBottom: 4 },
-  subText: { fontSize: 12, color: '#888' },
-  
-  actions: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 10,
-  },
-  acceptBtn: {
-    backgroundColor: '#34C759',
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 8,
-  },
-  acceptText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
-  
-
-  rejectBtn: {
-      backgroundColor: '#ffebee', 
-      paddingVertical: 8,
-      paddingHorizontal: 12,
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: '#ffcdd2'
-  },
-  rejectText: {
-      color: '#d32f2f', 
-      fontWeight: 'bold',
-      fontSize: 14
-  }
+    overlay: {
+        flex: 1,
+        backgroundColor: COLORS.overlay,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    container: {
+        width: '90%',
+        maxHeight: '80%',
+        backgroundColor: COLORS.modalBg,
+        borderRadius: 20,
+        padding: 20,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 10,
+        elevation: 10,
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+        paddingBottom: 15,
+        borderBottomWidth: 1,
+        borderColor: COLORS.border,
+    },
+    headerTitleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    title: { 
+        fontSize: 20, 
+        fontWeight: 'bold',
+        color: COLORS.text, 
+    },
+    closeBtn: { 
+        padding: 5 
+    },
+    centerContent: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: 150,
+    },
+    emptyText: { 
+        textAlign: 'center', 
+        marginTop: 15, 
+        color: COLORS.textSecondary, 
+        fontSize: 16 
+    },
+    listContent: {
+        paddingBottom: 10,
+    },
+    card: {
+        backgroundColor: COLORS.cardBg,
+        padding: 16,
+        borderRadius: 12,
+        marginBottom: 12,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    info: { 
+        flex: 1,
+        marginRight: 10,
+    },
+    workoutName: { 
+        fontSize: 16, 
+        fontWeight: '600', 
+        marginBottom: 6,
+        color: COLORS.text, 
+    },
+    metaRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    subText: { 
+        fontSize: 12, 
+        color: COLORS.textSecondary, 
+    },
+    
+    actions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+    },
+    acceptBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: COLORS.primary, 
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderRadius: 10,
+        minWidth: 100,
+        justifyContent: 'center',
+    },
+    acceptText: { 
+        color: '#fff', 
+        fontWeight: 'bold', 
+        fontSize: 14 
+    },
+    rejectBtn: {
+        backgroundColor: 'transparent', 
+        padding: 10,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: COLORS.danger,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
 });
 
 export default WorkoutInboxModal;

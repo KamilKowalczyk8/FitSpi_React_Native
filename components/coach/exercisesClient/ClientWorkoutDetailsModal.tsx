@@ -1,13 +1,14 @@
+import { COLORS } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Modal,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Alert,
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 import ExerciseList from "@/components/workout/ExerciseList";
@@ -78,29 +79,35 @@ const ClientWorkoutDetailsModal: React.FC<Props> = ({ visible, onClose, workout 
   if (!workout) return null;
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+    <Modal 
+        visible={visible} 
+        animationType="slide" 
+        presentationStyle="pageSheet" 
+        onRequestClose={onClose}
+    >
       <View style={styles.container}>
         
-        {/* Nagłówek */}
         <View style={styles.header}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Ionicons name="close" size={28} color="#333" />
+            <Ionicons name="close" size={28} color={COLORS.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Podgląd Treningu</Text>
-          {/* Upewnij się, że ten View jest zamknięty i nie ma spacji w środku */}
           <View style={{ width: 28 }} /> 
         </View>
 
-        {/* Tytuł i Data */}
         <View style={styles.infoSection}>
           <WorkoutTitle title={workout.description || "Bez nazwy"} />
-          <Text style={styles.dateText}>{workout.date}</Text>
+          <View style={styles.dateContainer}>
+              <Ionicons name="calendar-outline" size={16} color={COLORS.textSecondary} style={{marginRight: 6}} />
+              <Text style={styles.dateText}>{workout.date}</Text>
+          </View>
         </View>
 
-        {/* Lista ćwiczeń */}
         <View style={styles.listContainer}>
           {loading ? (
-            <ActivityIndicator size="large" color="#34C759" style={{ marginTop: 20 }} />
+            <View style={styles.centered}>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+            </View>
           ) : (
             <ExerciseList
               exercises={exercises}
@@ -114,8 +121,10 @@ const ClientWorkoutDetailsModal: React.FC<Props> = ({ visible, onClose, workout 
           <TouchableOpacity 
             style={styles.addButton} 
             onPress={() => setAddExerciseVisible(true)}
+            activeOpacity={0.8}
           >
-            <Text style={styles.addButtonText}>➕ Dodaj ćwiczenie</Text>
+            <Ionicons name="add-circle" size={20} color="#fff" style={{marginRight: 8}} />
+            <Text style={styles.addButtonText}>Dodaj ćwiczenie</Text>
           </TouchableOpacity>
         </View>
 
@@ -134,48 +143,70 @@ const ClientWorkoutDetailsModal: React.FC<Props> = ({ visible, onClose, workout 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: 10,
+    backgroundColor: COLORS.background, 
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 15,
-    paddingBottom: 10,
+    paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: COLORS.border,
+    backgroundColor: COLORS.cardBg, 
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: COLORS.text,
   },
   closeButton: {
     padding: 5,
   },
   infoSection: {
-    padding: 15,
+    padding: 20,
     alignItems: 'center',
-    backgroundColor: '#f9f9f9',
+    backgroundColor: COLORS.background, 
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  dateContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 8,
   },
   dateText: {
-    marginTop: 5,
-    color: '#666',
+    color: COLORS.textSecondary,
+    fontSize: 14,
   },
   listContainer: {
     flex: 1,
+    backgroundColor: COLORS.background, 
+  },
+  centered: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
   },
   footer: {
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
-    backgroundColor: '#fff',
+    borderTopColor: COLORS.border,
+    backgroundColor: COLORS.cardBg, 
+    paddingBottom: 40, 
   },
   addButton: {
-    backgroundColor: '#34C759',
-    padding: 15,
-    borderRadius: 10,
+    flexDirection: 'row',
+    backgroundColor: COLORS.primary, 
+    paddingVertical: 16,
+    borderRadius: 12,
     alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 4,
   },
   addButtonText: {
     color: '#fff',

@@ -1,50 +1,51 @@
-import { Ionicons } from '@expo/vector-icons'; // Importujemy standardowe ikony Expo
+import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
 import TabBarBackground from '@/components/ui/TabBarBackground';
+import { useAuth } from '@/hooks/useAuth';
 
-// Kolory naszego motywu Blue Active
 const COLORS = {
-  tabBarBg: '#1E1E1E',   // Nieco jaśniejsze tło dla paska nawigacji
-  primary: '#2979FF',    // Neonowy Błękit (Aktywny)
-  inactive: '#757575',   // Szary (Nieaktywny)
-  border: '#2C2C2C',     // Kolor górnej krawędzi paska
+  tabBarBg: '#1E1E1E',
+  primary: '#2979FF',
+  inactive: '#757575',
+  border: '#2C2C2C',
 };
 
 export default function TabLayout() {
-  
+  const { user } = useAuth();
+
+  const shouldHideCoachTab = user?.role_id === 2;
+
   return (
     <Tabs
       screenOptions={{
-      
         tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: COLORS.inactive,
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
         
-     
+
         tabBarStyle: Platform.select({
           ios: {
-            position: 'absolute', 
-            backgroundColor: COLORS.tabBarBg, 
+            position: 'absolute',
+            backgroundColor: COLORS.tabBarBg,
             borderTopColor: COLORS.border,
           },
           default: {
             backgroundColor: COLORS.tabBarBg,
             borderTopColor: COLORS.border,
             borderTopWidth: 1,
-            height: 108,
-            paddingBottom: 8,
-            paddingTop: 8,
+            elevation: 0, 
           },
         }),
-    
+      
+
         tabBarLabelStyle: {
-            fontSize: 12,
-            fontWeight: '600',
+          fontSize: 12,
+          fontWeight: '600',
         }
       }}
     >
@@ -72,6 +73,8 @@ export default function TabLayout() {
         name="coach/index"
         options={{
           title: 'Podopieczni',
+          href: shouldHideCoachTab ? null : undefined,
+          
           tabBarIcon: ({ color, focused }) => (
             <Ionicons size={28} name={focused ? 'people' : 'people-outline'} color={color} />
           ),

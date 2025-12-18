@@ -1,3 +1,4 @@
+import { COLORS } from '@/constants/theme';
 import { InvitationResponse } from '@/controllers/coach/clientLink.controller';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
@@ -20,19 +21,34 @@ const InvitationTile: React.FC<InvitationTileProps> = ({ invitation, onRespond }
   return (
     <View style={styles.tile}>
       <View style={styles.infoContainer}>
-        <Text style={styles.name}>Zaproszenie od trenera:</Text>
-        <Text style={styles.trainerName}>{trainerName}</Text>
+        <View style={styles.row}>
+            <Ionicons name="person-circle-outline" size={20} color={COLORS.textSecondary} style={{marginRight: 6}} />
+            <Text style={styles.label}>Zaproszenie od trenera:</Text>
+        </View>
+        <Text style={styles.trainerName} numberOfLines={1}>{trainerName}</Text>
+        <Text style={styles.date}>{new Date(invitation.createdAt).toLocaleDateString()}</Text>
       </View>
       
       {isLoading ? (
-        <ActivityIndicator size="small" color="#000" />
+        <View style={styles.loaderContainer}>
+            <ActivityIndicator size="small" color={COLORS.primary} />
+        </View>
       ) : (
         <View style={styles.buttonsContainer}>
-          <TouchableOpacity style={[styles.button, styles.rejectButton]} onPress={() => handlePress(false)}>
-            <Ionicons name="close" size={24} color="#fff" />
+          <TouchableOpacity 
+            style={[styles.button, styles.rejectButton]} 
+            onPress={() => handlePress(false)}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="close" size={20} color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.acceptButton]} onPress={() => handlePress(true)}>
-            <Ionicons name="checkmark" size={24} color="#fff" />
+          
+          <TouchableOpacity 
+            style={[styles.button, styles.acceptButton]} 
+            onPress={() => handlePress(true)}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="checkmark" size={20} color="#fff" />
           </TouchableOpacity>
         </View>
       )}
@@ -43,39 +59,67 @@ const InvitationTile: React.FC<InvitationTileProps> = ({ invitation, onRespond }
 const styles = StyleSheet.create({
   tile: {
     flexDirection: 'row',
-    backgroundColor: '#f9f9f9',
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: COLORS.cardBg, 
+    padding: 16,
+    borderRadius: 12,
     marginBottom: 12,
     alignItems: 'center',
     justifyContent: 'space-between',
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
   },
   infoContainer: {
     flex: 1,
+    marginRight: 10,
   },
-  name: {
-    fontSize: 14,
-    color: '#666',
+  row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 4,
+  },
+  label: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
   },
   trainerName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#000',
+    color: COLORS.text, 
+    marginBottom: 2,
+  },
+  date: {
+      fontSize: 12,
+      color: COLORS.textPlaceholder,
   },
   buttonsContainer: {
     flexDirection: 'row',
+    gap: 12,
+  },
+  loaderContainer: {
+      paddingHorizontal: 20,
   },
   button: {
-    padding: 8,
-    borderRadius: 20, 
-    marginLeft: 10,
+    width: 44,
+    height: 44,
+    borderRadius: 22, 
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 2,
   },
   acceptButton: {
-    backgroundColor: '#34C759', 
+    backgroundColor: COLORS.success, 
   },
   rejectButton: {
-    backgroundColor: '#FF3B30', 
+    backgroundColor: COLORS.danger, 
   },
 });
 

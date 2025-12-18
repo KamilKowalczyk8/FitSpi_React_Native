@@ -1,19 +1,21 @@
 import { getWorkoutStatusColor, getWorkoutStatusLabel } from '@/app/utils/workoutStatusHelper';
+import { COLORS } from '@/constants/theme';
 import { ClientResponse } from '@/controllers/coach/clientLink.controller';
 import { WorkoutController } from "@/controllers/workout/workout.controller";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientWorkoutsController } from "@/hooks/useClientWorkoutsController";
 import { WorkoutItem, WorkoutStatus } from "@/models/Workout";
+import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
   Modal,
-  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import CreateWorkoutModal from './CreateWorkoutModal.tsx';
 import ClientWorkoutDetailsModal from './exercisesClient/ClientWorkoutDetailsModal';
@@ -33,7 +35,6 @@ const ClientWorkoutsModal: React.FC<Props> = ({
 }) => {
   const { token } = useAuth();
   const { workouts, loading, error, refresh } = useClientWorkoutsController(client, visible, false);
-  
   
   const [selectedWorkout, setSelectedWorkout] = useState<WorkoutItem | null>(null);
   const [isDetailsVisible, setDetailsVisible] = useState(false);
@@ -58,7 +59,6 @@ const ClientWorkoutsModal: React.FC<Props> = ({
     try {
       await WorkoutController.updateWorkoutDescription(token, selectedWorkout.id, newTitle);
       setEditTitleVisible(false);
-      
       Alert.alert("Sukces", "Nazwa zmieniona.");
       refresh();
     } catch (e: any) {
@@ -96,27 +96,35 @@ const ClientWorkoutsModal: React.FC<Props> = ({
   return (
     <>
       <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-        <Pressable style={styles.overlay} onPress={onClose}>
-          <Pressable style={styles.container}>
+        <View style={styles.overlay}>
+          <View style={styles.container}>
 
-            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-              <Text style={styles.closeButtonText}>✕</Text>
+            {/* Header: Close Button & Title */}
+            <TouchableOpacity style={styles.closeButton} onPress={onClose} hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+              <Ionicons name="close" size={24} color={COLORS.textSecondary} />
             </TouchableOpacity>
 
-            <Text style={styles.title}>Treningi dla</Text>
-            <Text style={styles.clientName}>
-              {client.first_name} {client.last_name}
-            </Text>
+            <View style={styles.header}>
+                <Text style={styles.title}>Treningi dla</Text>
+                <Text style={styles.clientName}>
+                {client.first_name} {client.last_name}
+                </Text>
+            </View>
 
+            {/* Content */}
             {loading ? (
-              <Text style={{ textAlign: 'center', marginTop: 20 }}>Ładowanie…</Text>
+               <View style={styles.centerContent}>
+                   <ActivityIndicator size="large" color={COLORS.primary} />
+               </View>
             ) : error ? (
-              <Text style={{ color: "red", textAlign: 'center', marginTop: 20 }}>{error}</Text>
+              <View style={styles.centerContent}>
+                   <Text style={styles.errorText}>{error}</Text>
+              </View>
             ) : (
               <FlatList<WorkoutItem>
                 data={filteredWorkouts}
                 keyExtractor={(item) => item.id.toString()}
-                contentContainerStyle={{ paddingBottom: 20 }}
+                contentContainerStyle={styles.listContent}
                 
                 renderItem={({ item, index }) => (
                   <View 
@@ -126,15 +134,16 @@ const ClientWorkoutsModal: React.FC<Props> = ({
                     ]}
                   >
                     <TouchableOpacity 
-                      style={{ flex: 1, justifyContent: 'center' }} 
+                      style={styles.tileContent} 
                       onPress={() => openDetails(item)}
                     >
-                      <Text style={styles.workoutName}>{item.description}</Text>
-                      <Text style={styles.date}>{item.date}</Text>
-                      
-                      <Text style={[styles.statusText, { color: getWorkoutStatusColor(item.status) }]}>
-                        {getWorkoutStatusLabel(item.status)}
-                      </Text>
+                      <Text style={styles.workoutName} numberOfLines={1}>{item.description}</Text>
+                      <View style={styles.metaRow}>
+                          <Text style={styles.date}>{item.date}</Text>
+                          <Text style={[styles.statusText, { color: getWorkoutStatusColor(item.status) }]}>
+                            • {getWorkoutStatusLabel(item.status)}
+                          </Text>
+                      </View>
                     </TouchableOpacity>
 
                     <ClientWorkoutOptions 
@@ -148,7 +157,7 @@ const ClientWorkoutsModal: React.FC<Props> = ({
                 )}
                 ListEmptyComponent={
                   <Text style={styles.emptyText}>
-                    Ten podopieczny nie ma jeszcze żadnych treningów.
+                    Ten podopieczny nie ma jeszcze żadnych aktywnych treningów.
                   </Text>
                 }
               />
@@ -157,12 +166,14 @@ const ClientWorkoutsModal: React.FC<Props> = ({
             <TouchableOpacity 
               style={styles.createButton} 
               onPress={() => setCreateVisible(true)}
+              activeOpacity={0.8}
             >
-              <Text style={styles.createButtonText}>➕ Stwórz nowy trening</Text>
+              <Ionicons name="add-circle" size={20} color="#fff" style={{marginRight: 8}} />
+              <Text style={styles.createButtonText}>Stwórz nowy trening</Text>
             </TouchableOpacity>
 
-          </Pressable>
-        </Pressable>
+          </View>
+        </View>
       </Modal>
 
       <ClientWorkoutDetailsModal 
@@ -197,88 +208,117 @@ const ClientWorkoutsModal: React.FC<Props> = ({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: COLORS.overlay,
     justifyContent: 'center',
     alignItems: 'center',
   },
   container: {
     width: '90%',
     maxHeight: '85%',
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: COLORS.modalBg,
+    borderRadius: 20,
     padding: 20,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    
+    // Cienie
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 10,
   },
   closeButton: {
     position: "absolute",
-    top: 10,
-    right: 10,
+    top: 15,
+    right: 15,
+    zIndex: 10,
     padding: 5,
-    backgroundColor: "#eee",
-    borderRadius: 20,
-    zIndex: 1,
   },
-  closeButtonText: { 
-    fontSize: 18, 
-    fontWeight: "bold", 
-    color: "#333", 
-    paddingHorizontal: 6 
+  header: {
+    marginBottom: 20,
+    marginTop: 10,
+    alignItems: 'center',
   },
   title: { 
-    fontSize: 16, 
-    color: '#888', 
-    textAlign: 'center', 
-    marginBottom: 5 
+    fontSize: 14, 
+    color: COLORS.textSecondary, 
+    marginBottom: 4 
   },
   clientName: { 
     fontSize: 22, 
     fontWeight: 'bold', 
+    color: COLORS.text, 
     textAlign: 'center', 
-    marginBottom: 20 
+  },
+  centerContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: 100,
+  },
+  listContent: {
+      paddingBottom: 20,
   },
   workoutTile: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: '#f9f9f9',
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 10,
+    alignItems: 'center',
+    backgroundColor: COLORS.cardBg, // Ciemne tło karty
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#eee',
-    minHeight: 75, 
+    borderColor: COLORS.border,
+  },
+  tileContent: {
+      flex: 1,
+      marginRight: 10,
   },
   workoutName: { 
     fontSize: 16, 
     fontWeight: '600', 
-    color: "#333",
+    color: COLORS.text,
     marginBottom: 4
+  },
+  metaRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
   },
   date: { 
     fontSize: 13, 
-    color: "#777",
-    marginBottom: 2
+    color: COLORS.textSecondary,
+    marginRight: 8,
   },
   statusText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '500',
-    marginTop: 2,
   },
   emptyText: { 
     textAlign: 'center', 
-    paddingVertical: 30, 
-    color: '#888', 
-    fontSize: 16 
+    paddingVertical: 40, 
+    color: COLORS.textSecondary, 
+    fontSize: 15,
+    fontStyle: 'italic',
+  },
+  errorText: {
+      color: COLORS.danger,
+      textAlign: 'center',
+      fontSize: 16,
   },
   createButton: { 
-    backgroundColor: '#34C759', 
-    padding: 15, 
-    borderRadius: 10, 
+    flexDirection: 'row',
+    backgroundColor: COLORS.primary, // Neon Blue
+    paddingVertical: 14, 
+    borderRadius: 12, 
     alignItems: 'center', 
-    marginTop: 10 
+    justifyContent: 'center',
+    marginTop: 10,
+    elevation: 2,
+    shadowColor: COLORS.primary,
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
   },
   createButtonText: { 
     color: '#fff', 

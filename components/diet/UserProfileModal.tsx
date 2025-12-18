@@ -1,15 +1,17 @@
+import { COLORS } from '@/constants/theme';
 import { useUserProfileForm } from '@/hooks/diet/useUserProfileForm';
 import { ActivityLevel, DietGoal, Gender } from '@/models/Profile';
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
-    ActivityIndicator,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { ChipSelector } from '../../app/utils/ChipSelector';
 
@@ -119,18 +121,21 @@ const UserProfileModal: React.FC<Props> = ({ visible, onClose }) => {
               onChange={setters.setActivity}
             />
 
-            {/* PRZYCISK ZAPISU */}
             <TouchableOpacity 
-              style={styles.saveButton} 
-              onPress={saveProfile}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.saveButtonText}>💾 Zapisz i Przelicz</Text>
-              )}
-            </TouchableOpacity>
+                            style={styles.saveButton} 
+                            onPress={saveProfile}
+                            disabled={loading}
+                            activeOpacity={0.8}
+                        >
+                            {loading ? (
+                                <ActivityIndicator color="#fff" />
+                            ) : (
+                                <>
+                                    <Ionicons name="save-outline" size={20} color="#fff" style={{ marginRight: 8 }} />
+                                    <Text style={styles.saveButtonText}>Zapisz i Przelicz</Text>
+                                </>
+                            )}
+                        </TouchableOpacity>
 
           </ScrollView>
         )}
@@ -171,13 +176,24 @@ const styles = StyleSheet.create({
   },
   
   saveButton: {
-    backgroundColor: '#007AFF',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  saveButtonText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
+        flexDirection: 'row',
+        backgroundColor: COLORS.primary, 
+        paddingVertical: 16,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 20,
+        shadowColor: COLORS.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+        elevation: 4,
+    },
+    saveButtonText: { 
+        color: '#fff', 
+        fontSize: 16, 
+        fontWeight: 'bold' 
+    },
 });
 
 export default UserProfileModal;

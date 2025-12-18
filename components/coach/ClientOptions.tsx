@@ -1,11 +1,12 @@
+import { COLORS } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
-    GestureResponderEvent,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  GestureResponderEvent,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 interface ClientOptionsProps {
@@ -25,18 +26,28 @@ const ClientOptions: React.FC<ClientOptionsProps> = ({
 }) => {
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.iconButton} onPress={onToggle}>
-        <Ionicons name="ellipsis-vertical" size={24} color="#555" />
+  
+      <TouchableOpacity 
+        style={styles.iconButton} 
+        onPress={onToggle}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} 
+      >
+        <Ionicons name="ellipsis-vertical" size={20} color={COLORS.textSecondary} />
       </TouchableOpacity>
 
       {isOpen && (
         <View style={styles.dropdown}>
+          
           <TouchableOpacity style={styles.optionButton} onPress={onBrowseWorkouts}>
-            <Text style={styles.optionText}>Przejrzyj treningi</Text>
+            <Ionicons name="list-outline" size={18} color={COLORS.text} style={styles.icon} />
+            <Text style={styles.optionText}>Przeglądaj treningi</Text>
           </TouchableOpacity>
 
+          <View style={styles.separator} />
+          
           <TouchableOpacity style={styles.optionButton} onPress={onDelete}>
-            <Text style={[styles.optionText, { color: 'red' }]}>🗑️ Usuń podopiecznego</Text>
+            <Ionicons name="trash-outline" size={18} color={COLORS.danger} style={styles.icon} />
+            <Text style={[styles.optionText, { color: COLORS.danger }]}>Usuń podopiecznego</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -46,32 +57,49 @@ const ClientOptions: React.FC<ClientOptionsProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    zIndex: 1,
+    zIndex: 10, 
+    position: 'relative',
   },
   iconButton: {
-    padding: 10,
+    padding: 8,
   },
   dropdown: {
     position: 'absolute',
-    top: 40,
-    right: 15, 
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    elevation: 5, 
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
+    top: 35,
+    right: 10, 
+    backgroundColor: COLORS.cardBg, 
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#eee',
-    width: 200, 
+    borderColor: COLORS.border,
+    minWidth: 200,
+    
+    // Cienie
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
+    zIndex: 20,
   },
   optionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 12,
-    paddingHorizontal: 15,
+    paddingHorizontal: 16,
+  },
+  icon: {
+    marginRight: 10,
   },
   optionText: {
-    fontSize: 16,
+    fontSize: 14,
+    color: COLORS.text, // Jasny tekst
+    fontWeight: '500',
   },
+  separator: {
+    height: 1,
+    backgroundColor: COLORS.border,
+    marginHorizontal: 10,
+  }
 });
 
 export default ClientOptions;
