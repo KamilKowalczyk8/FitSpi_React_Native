@@ -44,7 +44,7 @@ const ClientOptions: React.FC<ClientOptionsProps> = ({
           </TouchableOpacity>
 
           <View style={styles.separator} />
-          
+
           <TouchableOpacity style={styles.optionButton} onPress={onDelete}>
             <Ionicons name="trash-outline" size={18} color={COLORS.danger} style={styles.icon} />
             <Text style={[styles.optionText, { color: COLORS.danger }]}>Usuń podopiecznego</Text>
@@ -72,8 +72,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     minWidth: 200,
-    
-    // Cienie
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -92,7 +90,7 @@ const styles = StyleSheet.create({
   },
   optionText: {
     fontSize: 14,
-    color: COLORS.text, // Jasny tekst
+    color: COLORS.text, 
     fontWeight: '500',
   },
   separator: {

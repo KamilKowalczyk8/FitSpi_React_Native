@@ -1,21 +1,21 @@
-import { getWorkoutStatusColor, getWorkoutStatusLabel } from '@/app/utils/workoutStatusHelper';
 import { COLORS } from '@/constants/theme';
 import { ClientResponse } from '@/controllers/coach/clientLink.controller';
 import { WorkoutController } from "@/controllers/workout/workout.controller";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientWorkoutsController } from "@/hooks/useClientWorkoutsController";
 import { WorkoutItem, WorkoutStatus } from "@/models/Workout";
+import { getWorkoutStatusColor, getWorkoutStatusLabel } from '@/utils/workoutStatusHelper.js';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  Modal,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    Modal,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import CreateWorkoutModal from './CreateWorkoutModal.tsx';
 import ClientWorkoutDetailsModal from './exercisesClient/ClientWorkoutDetailsModal';

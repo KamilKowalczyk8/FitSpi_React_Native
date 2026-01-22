@@ -38,7 +38,7 @@ export interface DailySummary {
 export interface NutritionTargets {
   kcal: number;
   protein: number;
-  fat: number;
+  fats: number;
   carbs: number;
 }
 

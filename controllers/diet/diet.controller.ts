@@ -1,5 +1,5 @@
-import { toDateString } from "@/app/utils/dateHelper";
 import { AddFoodPayload, CopyMealPayload, DailyDietResponse } from "@/models/Diet";
+import { toDateString } from "@/utils/dateHelper";
 
 export const DietController = {
   getDailyData: async (token: string, date: Date): Promise<DailyDietResponse> => {

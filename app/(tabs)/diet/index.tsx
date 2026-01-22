@@ -1,4 +1,3 @@
-import { getMealColor, getMealLabel } from '@/app/utils/mealHelper';
 import SettingsDrawer from '@/components/SettingsDrawer';
 import { AddFoodButton } from '@/components/diet/AddFoodButton';
 import { AddFoodModal } from '@/components/diet/AddFoodModal';
@@ -6,9 +5,10 @@ import { CopyMealModal } from '@/components/diet/CopyMealModal';
 import { DietSummary } from '@/components/diet/DietSummary';
 import { MealSection } from '@/components/diet/MealSection';
 import { DateSlider } from '@/components/workout/DateSlider';
-import { COLORS } from '@/constants/theme'; // Import motywu
+import { COLORS } from '@/constants/theme';
 import { useDiet } from '@/hooks/diet/useDiet';
 import { MealType } from '@/models/Diet';
+import { getMealColor, getMealLabel } from '@/utils/mealHelper';
 import { useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -83,7 +83,7 @@ const DietScreen = () => {
             goals={{
                 calories: targets.kcal,
                 protein: targets.protein,
-                fats: targets.fat,
+                fats: targets.fats,
                 carbs: targets.carbs
             }}
           />

@@ -13,7 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { ChipSelector } from '../../app/utils/ChipSelector';
+import { ChipSelector } from '../ChipSelector';
 
 interface Props {
   visible: boolean;

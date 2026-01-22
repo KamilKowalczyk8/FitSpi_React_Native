@@ -1,6 +1,6 @@
-import { getMealLabel } from '@/app/utils/mealHelper';
 import { COLORS } from '@/constants/theme'; // Import motywu
 import { MealType } from '@/models/Diet';
+import { getMealLabel } from '@/utils/mealHelper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import React, { useState } from 'react';
 import { Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';

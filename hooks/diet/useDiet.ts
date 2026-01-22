@@ -95,8 +95,8 @@ export const useDiet = (selectedDate: Date) => {
     return groups;
   }, [foodLogs]);
 
-  const emptyTargets = { kcal: 0, protein: 0, fat: 0, carbs: 0 };
-  const emptySummary = { kcal: 0, protein: 0, fat: 0, carbs: 0 };
+  const emptyTargets = { kcal: 0, protein: 0, fats: 0, carbs: 0 };
+  const emptySummary = { kcal: 0, protein: 0, fats: 0, carbs: 0 };
 
   return {
     foodLogs,

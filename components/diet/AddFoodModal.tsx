@@ -16,7 +16,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { ChipSelector } from '../../app/utils/ChipSelector';
+import { ChipSelector } from '../ChipSelector';
 
 interface Props {
     visible: boolean;
@@ -219,8 +219,6 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         color: COLORS.text,
     },
-    
-    // Wrappery dla inputów
     inputWrapper: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -240,9 +238,8 @@ const styles = StyleSheet.create({
         marginLeft: 5,
     },
 
-    // Wyszukiwarka
     searchContainer: {
-        zIndex: 100, // Najważniejsze: lista musi być nad wszystkim
+        zIndex: 100, 
         marginBottom: 16,
     },
     searchInput: {
@@ -252,17 +249,15 @@ const styles = StyleSheet.create({
         height: '100%',
     },
     searchInputSelected: {
-        color: COLORS.primary, // Kolor tekstu po wybraniu produktu
+        color: COLORS.primary, 
         fontWeight: '600',
     },
     clearButton: {
         padding: 5,
     },
-
-    // Lista wyników (Dropdown)
     listContainer: {
         position: 'absolute',
-        top: 55, // Zaraz pod inputem
+        top: 55, 
         left: 0,
         right: 0,
         maxHeight: 220,
@@ -271,7 +266,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: COLORS.border,
         elevation: 20,
-        zIndex: 200, // Musi być wyżej niż reszta
+        zIndex: 200, 
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.5,
@@ -298,11 +293,9 @@ const styles = StyleSheet.create({
     },
     itemSubText: { 
         fontSize: 14, 
-        color: COLORS.primary, // Kcal na kolorowo
+        color: COLORS.primary, 
         fontWeight: '600',
     },
-
-    // Gramatura
     weightSection: {
         zIndex: 1, 
         marginBottom: 30,
@@ -313,8 +306,6 @@ const styles = StyleSheet.create({
         color: COLORS.text,
         height: '100%',
     },
-
-    // Przyciski
     buttonRow: {
         flexDirection: "row",
         justifyContent: "space-between",
