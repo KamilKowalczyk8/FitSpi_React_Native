@@ -1,50 +1,117 @@
-# Welcome to your Expo app 👋
+FitSpi (Frontend) - Aplikacja Mobilna React Native
+FitSpi to warstwa kliencka (frontend) kompleksowego systemu fitness, stworzona w technologii React Native przy użyciu platformy Expo. Aplikacja służy do zarządzania treningiem siłowym, monitorowania diety oraz umożliwia zdalną współpracę na linii trener-podopieczny.
++3
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Projekt stanowi część pracy inżynierskiej zrealizowanej na kierunku Informatyka (Uniwersytet Dolnośląski DSW).
++1
 
-## Get started
+Uwaga: To repozytorium zawiera kod źródłowy aplikacji mobilnej. Kod serwera (Backend) znajduje się w osobnym repozytorium: [Link do Backend]
 
-1. Install dependencies
+📱 Kluczowe Funkcjonalności
+Aplikacja typu "all-in-one" integrująca narzędzia dla osób trenujących i trenerów:
 
-   ```bash
-   npm install
-   ```
+Dla Użytkownika
 
-2. Start the app
+Planer Treningowy: Tworzenie, edycja i kopiowanie planów treningowych, baza ćwiczeń, rejestracja serii i obciążeń.
++2
 
-   ```bash
-   npx expo start
-   ```
 
-In the output, you'll find options to open the app in a
+Dziennik Żywieniowy: Monitorowanie kalorii i makroskładników, dodawanie posiłków (śniadanie, obiad, etc.), baza produktów.
++1
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+Profil Biometryczny: Automatyczne wyliczanie zapotrzebowania (BMR/CPM) na podstawie wagi, wzrostu i aktywności.
++1
 
-## Get a fresh project
 
-When you're ready, run:
+Współpraca: Odbieranie planów treningowych wysłanych przez trenera.
 
-```bash
-npm run reset-project
-```
+Dla Trenera
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Panel Trenera: Zarządzanie listą podopiecznych.
++1
 
-## Learn more
 
-To learn more about developing your project with Expo, look at the following resources:
+Kreator Planów: Tworzenie dedykowanych treningów i wysyłanie ich do klientów (statusy: Szkic -> Wysłany).
++1
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
 
-## Join the community
+Zaproszenia: System zapraszania podopiecznych via e-mail.
 
-Join our community of developers creating universal apps.
+🛠️ Stack Technologiczny
+Aplikacja została zbudowana w oparciu o nowoczesny ekosystem React Native:
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+Framework: React Native + Expo.
++1
+
+
+Język: TypeScript (Statyczne typowanie dla zwiększenia niezawodności).
++1
+
+
+Nawigacja: Expo Router v2 (File-based routing) – routing oparty na strukturze plików, inspirowany Next.js.
++1
+
+
+Komunikacja z API: Natywne Fetch API (zamiast zewnętrznych bibliotek jak Axios) dla optymalizacji rozmiaru aplikacji.
++1
+
+
+UI/UX: Ciemny motyw (Dark Mode) dla oszczędności energii i ergonomii.
+
+🏗️ Architektura Projektu (MVVM)
+Aby uniknąć "spaghetti code" i zapewnić skalowalność, w projekcie wdrożono adaptację wzorca MVVM (Model-View-ViewModel):
++1
+
+View (Warstwa Prezentacji):
+
+Katalog components/. Pasywne komponenty React renderujące interfejs na podstawie otrzymanych propsów. Nie zawierają logiki biznesowej.
+
+ViewModel (Warstwa Logiki - Custom Hooks):
+
+Katalog hooks/ (np. useCoachController, useDiet). Pośredniczą między widokiem a modelem. Zarządzają stanem (useState), cyklem życia (useEffect) i obsługą błędów.
++1
+
+Model (Warstwa Danych):
+
+Katalog controllers/. Obiekty odpowiedzialne wyłącznie za komunikację z REST API. Przyjmują dane i token, wysyłają żądanie i zwracają odpowiedź.
++1
+
+Struktura Katalogów
+Struktura oparta o Expo Router:
+
+Plaintext
+/app
+  ├── (auth)          # Ekrany publiczne (Logowanie, Rejestracja) - Stack Navigator
+  ├── (tabs)          # Ekrany chronione (Trening, Dieta, Trener) - Bottom Tabs
+  │     ├── coach     # Moduł trenera
+  │     ├── diet      # Moduł diety
+  │     └── workout   # Moduł treningowy
+  ├── _layout.tsx     # Główny Layout i ochrona tras (Auth Guard)
+/src
+  ├── components      # Komponenty UI (View)
+  ├── hooks           # Logika biznesowa (ViewModel)
+  ├── controllers     # Logika zapytań API (Model)
+  ├── models          # Interfejsy TypeScript
+  └── constants       # Stałe (np. kolory motywu)
+⚙️ Instalacja i Uruchomienie
+Wymagania
+Node.js (LTS)
+
+Aplikacja Expo Go na telefonie (Android/iOS) lub Emulator.
+
+Krok 1: Klonowanie i instalacja
+Bash
+git clone https://github.com/TwojLogin/FitSpi-Frontend.git
+cd FitSpi-Frontend
+npm install
+Krok 2: Konfiguracja zmiennych środowiskowych
+Utwórz plik .env w głównym katalogu i podaj adres API backendu:
+
+Fragment kodu
+EXPO_PUBLIC_API_URL=http://twoj-adres-ip:4000/api
+Krok 3: Uruchomienie
+Bash
+npx expo start
+Zeskanuj kod QR aplikacją Expo Go lub naciśnij a (Android) / i (iOS) w terminalu, aby uruchomić na emulatorze.
