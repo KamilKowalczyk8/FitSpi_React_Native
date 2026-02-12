@@ -62,27 +62,27 @@ Struktura oparta o Expo Router:
   └── constants       # Stałe (np. kolory motywu)
 
 
-**Instalacja i Uruchomienie**
+###Instalacja i Uruchomienie
 
-**Wymagania**
+##Wymagania
 - Node.js (LTS)
 - Aplikacja Expo Go na telefonie (Android/iOS) lub Emulator.
 
-**Krok 1: Klonowanie i instalacja**
+##Krok 1: Klonowanie i instalacja
 
 git clone - https://github.com/KamilKowalczyk8/FitSpi_React_Native
 cd FitSpiReact
 npm install
 
-**Krok 2: Konfiguracja zmiennych środowiskowych**
+##Krok 2: Konfiguracja zmiennych środowiskowych
 Utwórz plik .env w głównym katalogu i podaj adres API backendu:
-**EXPO_PUBLIC_API_URL=http://twoj-adres-ip:4000/api**
+EXPO_PUBLIC_API_URL=http://twoj-adres-ip:4000/api
 
-**Krok 3: Uruchomienie**
+##Krok 3: Uruchomienie
 
 npx expo start
 
 
-**Zrzuty Ekranu**
+###Zrzuty Ekranu
 
 
