@@ -1,87 +1,52 @@
-FitSpi (Frontend) - Aplikacja Mobilna React Native
-FitSpi to warstwa kliencka (frontend) kompleksowego systemu fitness, stworzona w technologii React Native przy użyciu platformy Expo. Aplikacja służy do zarządzania treningiem siłowym, monitorowania diety oraz umożliwia zdalną współpracę na linii trener-podopieczny.
-+3
+# FitSpi (Frontend) - Aplikacja Mobilna React Native
+
+**FitSpi** to warstwa kliencka (frontend) kompleksowego systemu fitness, stworzona w technologii **React Native** przy użyciu platformy **Expo**. Aplikacja służy do zarządzania treningiem siłowym, monitorowania diety oraz umożliwia zdalną współpracę na linii trener-podopieczny.
 
 Projekt stanowi część pracy inżynierskiej zrealizowanej na kierunku Informatyka (Uniwersytet Dolnośląski DSW).
-+1
 
-Uwaga: To repozytorium zawiera kod źródłowy aplikacji mobilnej. Kod serwera (Backend) znajduje się w osobnym repozytorium: [Link do Backend]
+> **Uwaga:** To repozytorium zawiera kod źródłowy aplikacji mobilnej. Kod serwera (Backend) znajduje się w osobnym repozytorium: [Link do Backend]
 
-📱 Kluczowe Funkcjonalności
+## Kluczowe Funkcjonalności
+
 Aplikacja typu "all-in-one" integrująca narzędzia dla osób trenujących i trenerów:
 
-Dla Użytkownika
+### Dla Użytkownika
+* **Planer Treningowy:** Tworzenie, edycja i kopiowanie planów treningowych, baza ćwiczeń, rejestracja serii i obciążeń.
+* **Dziennik Żywieniowy:** Monitorowanie kalorii i makroskładników, dodawanie posiłków (śniadanie, obiad, etc.), baza produktów.
+* **Profil Biometryczny:** Automatyczne wyliczanie zapotrzebowania (BMR/CPM) na podstawie wagi, wzrostu i aktywności.
+* **Współpraca:** Odbieranie planów treningowych wysłanych przez trenera.
 
-Planer Treningowy: Tworzenie, edycja i kopiowanie planów treningowych, baza ćwiczeń, rejestracja serii i obciążeń.
-+2
+### Dla Trenera
+* **Panel Trenera:** Zarządzanie listą podopiecznych.
+* **Kreator Planów:** Tworzenie dedykowanych treningów i wysyłanie ich do klientów (statusy: Szkic -> Wysłany).
+* **Zaproszenia:** System zapraszania podopiecznych via e-mail.
 
+##  Stack Technologiczny
 
-Dziennik Żywieniowy: Monitorowanie kalorii i makroskładników, dodawanie posiłków (śniadanie, obiad, etc.), baza produktów.
-+1
-
-
-Profil Biometryczny: Automatyczne wyliczanie zapotrzebowania (BMR/CPM) na podstawie wagi, wzrostu i aktywności.
-+1
-
-
-Współpraca: Odbieranie planów treningowych wysłanych przez trenera.
-
-Dla Trenera
-
-Panel Trenera: Zarządzanie listą podopiecznych.
-+1
-
-
-Kreator Planów: Tworzenie dedykowanych treningów i wysyłanie ich do klientów (statusy: Szkic -> Wysłany).
-+1
-
-
-Zaproszenia: System zapraszania podopiecznych via e-mail.
-
-🛠️ Stack Technologiczny
 Aplikacja została zbudowana w oparciu o nowoczesny ekosystem React Native:
 
+* **Framework:** React Native + Expo.
+* **Język:** TypeScript (Statyczne typowanie dla zwiększenia niezawodności).
+* **Nawigacja:** **Expo Router v2** (File-based routing) – routing oparty na strukturze plików, inspirowany Next.js.
+* **Komunikacja z API:** Natywne **Fetch API** (zamiast zewnętrznych bibliotek jak Axios) dla optymalizacji rozmiaru aplikacji.
+* **UI/UX:** Ciemny motyw (Dark Mode) dla oszczędności energii i ergonomii.
 
-Framework: React Native + Expo.
-+1
+##  Architektura Projektu (MVVM)
 
+Aby uniknąć "spaghetti code" i zapewnić skalowalność, w projekcie wdrożono adaptację wzorca **MVVM (Model-View-ViewModel)**:
 
-Język: TypeScript (Statyczne typowanie dla zwiększenia niezawodności).
-+1
+1.  **View (Warstwa Prezentacji):**
+    * Katalog `components/`. Pasywne komponenty React renderujące interfejs na podstawie otrzymanych propsów. Nie zawierają logiki biznesowej.
+2.  **ViewModel (Warstwa Logiki - Custom Hooks):**
+    * Katalog `hooks/` (np. `useCoachController`, `useDiet`). Pośredniczą między widokiem a modelem. Zarządzają stanem (`useState`), cyklem życia (`useEffect`) i obsługą błędów.
+3.  **Model (Warstwa Danych):**
+    * Katalog `controllers/`. Obiekty odpowiedzialne wyłącznie za komunikację z REST API. Przyjmują dane i token, wysyłają żądanie i zwracają odpowiedź.
 
+### Struktura Katalogów
 
-Nawigacja: Expo Router v2 (File-based routing) – routing oparty na strukturze plików, inspirowany Next.js.
-+1
-
-
-Komunikacja z API: Natywne Fetch API (zamiast zewnętrznych bibliotek jak Axios) dla optymalizacji rozmiaru aplikacji.
-+1
-
-
-UI/UX: Ciemny motyw (Dark Mode) dla oszczędności energii i ergonomii.
-
-🏗️ Architektura Projektu (MVVM)
-Aby uniknąć "spaghetti code" i zapewnić skalowalność, w projekcie wdrożono adaptację wzorca MVVM (Model-View-ViewModel):
-+1
-
-View (Warstwa Prezentacji):
-
-Katalog components/. Pasywne komponenty React renderujące interfejs na podstawie otrzymanych propsów. Nie zawierają logiki biznesowej.
-
-ViewModel (Warstwa Logiki - Custom Hooks):
-
-Katalog hooks/ (np. useCoachController, useDiet). Pośredniczą między widokiem a modelem. Zarządzają stanem (useState), cyklem życia (useEffect) i obsługą błędów.
-+1
-
-Model (Warstwa Danych):
-
-Katalog controllers/. Obiekty odpowiedzialne wyłącznie za komunikację z REST API. Przyjmują dane i token, wysyłają żądanie i zwracają odpowiedź.
-+1
-
-Struktura Katalogów
 Struktura oparta o Expo Router:
 
-Plaintext
+```text
 /app
   ├── (auth)          # Ekrany publiczne (Logowanie, Rejestracja) - Stack Navigator
   ├── (tabs)          # Ekrany chronione (Trening, Dieta, Trener) - Bottom Tabs
@@ -95,23 +60,29 @@ Plaintext
   ├── controllers     # Logika zapytań API (Model)
   ├── models          # Interfejsy TypeScript
   └── constants       # Stałe (np. kolory motywu)
-⚙️ Instalacja i Uruchomienie
-Wymagania
-Node.js (LTS)
 
-Aplikacja Expo Go na telefonie (Android/iOS) lub Emulator.
 
-Krok 1: Klonowanie i instalacja
-Bash
-git clone https://github.com/TwojLogin/FitSpi-Frontend.git
-cd FitSpi-Frontend
+**Instalacja i Uruchomienie**
+
+**Wymagania**
+- Node.js (LTS)
+- Aplikacja Expo Go na telefonie (Android/iOS) lub Emulator.
+
+**Krok 1: Klonowanie i instalacja**
+
+git clone - https://github.com/KamilKowalczyk8/FitSpi_React_Native
+cd FitSpiReact
 npm install
-Krok 2: Konfiguracja zmiennych środowiskowych
-Utwórz plik .env w głównym katalogu i podaj adres API backendu:
 
-Fragment kodu
-EXPO_PUBLIC_API_URL=http://twoj-adres-ip:4000/api
-Krok 3: Uruchomienie
-Bash
+**Krok 2: Konfiguracja zmiennych środowiskowych**
+Utwórz plik .env w głównym katalogu i podaj adres API backendu:
+**EXPO_PUBLIC_API_URL=http://twoj-adres-ip:4000/api**
+
+**Krok 3: Uruchomienie**
+
 npx expo start
-Zeskanuj kod QR aplikacją Expo Go lub naciśnij a (Android) / i (iOS) w terminalu, aby uruchomić na emulatorze.
+
+
+**Zrzuty Ekranu**
+
+
