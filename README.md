@@ -85,4 +85,8 @@ npx expo start
 
 ### Zrzuty Ekranu
 
+## 📸 Zrzuty Ekranu
 
+| Logowanie | Panel Trenera | Dziennik Diety | Trening |
+|:---:|:---:|:---:|:---:|
+| <img src="TUTAJ_WKLEJ_LINK_DO_LOGIN" width="200"> | <img src="https://github.com/KamilKowalczyk8/FitSpi_React_Native/issues/2" width="200"> 
