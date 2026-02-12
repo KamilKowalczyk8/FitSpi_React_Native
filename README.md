@@ -89,4 +89,7 @@ npx expo start
 
 | Logowanie | Panel Trenera | Dziennik Diety | Trening |
 |:---:|:---:|:---:|:---:|
-| <img src="TUTAJ_WKLEJ_LINK_DO_LOGIN" width="200"> | <img src="https://github.com/KamilKowalczyk8/FitSpi_React_Native/issues/2" width="200"> 
+<img width="557" height="604" alt="Image" src="https://github.com/user-attachments/assets/5030dd0a-810f-4ead-b9ae-e3b2791856c9" />
+<img width="1168" height="504" alt="Image" src="https://github.com/user-attachments/assets/c8cf255d-24f7-46bd-ac06-8113c465767b" />
+<img width="1423" height="768" alt="Image" src="https://github.com/user-attachments/assets/009677fe-56b6-4fa1-8369-3a73fd95f9f0" />
+<img width="1258" height="545" alt="Image" src="https://github.com/user-attachments/assets/720dd38b-008e-46e4-abab-53e23e9b78d5" />
